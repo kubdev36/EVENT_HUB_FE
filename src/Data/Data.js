@@ -55,7 +55,7 @@ export const COMPETITORS_DATA = [
     stats: { release: 2, promo: 1, internal: 1 },
     events: [
       {
-        id: 'cp-scamp',
+        id: 1,
         date: '2026-08-13',
         time: '09:00',
         type: 'release',
@@ -63,10 +63,9 @@ export const COMPETITORS_DATA = [
         desc: 'Học sinh, sinh viên, giáo viên có cơ hội giảm thêm 10% khi mua thiết bị công nghệ, nhận voucher ba triệu đồng, quà tặng và trợ giá lên đời máy tại CellphoneS.',
         image: 'https://i1-vnexpress.vnecdn.net/2026/06/30/image001-1782808879-4903-1782809202.jpg?w=1020&h=0&q=100&dpr=1&fit=crop&s=lUmIOvY2Hy5xG0Ggbo7z1w',
         url: 'https://vnexpress.net/cellphones-trien-khai-loat-uu-dai-mua-tuu-truong-2026-5091632.html',
-        source: 'VnExpress, 30/6/2026',
       },
       {
-        id: 'cp-sstudent',
+        id: 2,
         date: '2026-08-13',
         time: '12:00',
         type: 'promo',
@@ -74,10 +73,9 @@ export const COMPETITORS_DATA = [
         desc: 'Học sinh, sinh viên (thẻ S-Student) và giáo viên (thẻ S-Teacher) được giảm thêm đến 10% khi mua laptop, máy tính bảng, điện thoại.',
         image: 'https://cdn2.cellphones.com.vn/x/media/wysiwyg/Web/landing-page/back-to-school/HEADING-D2-AWS-D1-1.png',
         url: 'https://cellphones.com.vn/uu-dai-sinh-vien-hoc-sinh',
-        source: 'CellphoneS / VnExpress, 6-7/2026',
       },
       {
-        id: 'cp-galaxy-fold',
+        id: 3,
         date: '2026-08-22',
         time: '10:00',
         type: 'release',
@@ -85,10 +83,9 @@ export const COMPETITORS_DATA = [
         desc: 'Mở bán dòng điện thoại gập mới nhất của Samsung tại toàn hệ thống CellphoneS với quà tặng lên đến 10 triệu đồng, hỗ trợ trả góp 0% và thu cũ đổi mới trợ giá cao.',
         image: 'https://i1-vnexpress.vnecdn.net/2026/06/30/image001-1782808879-4903-1782809202.jpg?w=1020&h=0&q=100&dpr=1&fit=crop&s=lUmIOvY2Hy5xG0Ggbo7z1w',
         url: 'https://cellphones.com.vn',
-        source: 'CellphoneS, 22/8/2026',
       },
       {
-        id: 'cp-marathon',
+        id: 4,
         date: '2026-08-15',
         time: '06:00',
         type: 'internal',
@@ -96,7 +93,6 @@ export const COMPETITORS_DATA = [
         desc: 'Hoạt động thể thao thường niên nhằm nâng cao tinh thần đồng đội và rèn luyện sức khỏe cho toàn thể nhân viên CellphoneS khu vực phía Nam.',
         image: 'https://i1-vnexpress.vnecdn.net/2026/06/30/image001-1782808879-4903-1782809202.jpg?w=1020&h=0&q=100&dpr=1&fit=crop&s=lUmIOvY2Hy5xG0Ggbo7z1w',
         url: '',
-        source: 'Nội bộ CellphoneS',
       }
     ]
   },
@@ -109,7 +105,7 @@ export const COMPETITORS_DATA = [
     stats: { promo: 2, live: 1, ads: 1 },
     events: [
       {
-        id: 'fpt-b2s-laptop',
+        id: 5,
         date: '2026-08-13',
         time: '08:30',
         type: 'promo',
@@ -117,10 +113,9 @@ export const COMPETITORS_DATA = [
         desc: 'Mùa tựu trường 2026, FPT Shop triển khai chương trình “Điểm càng cao, giảm càng sâu”, giúp học sinh, tân sinh viên và phụ huynh tiết kiệm thêm chi phí khi mua laptop cho năm học mới.',
         image: 'https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/fpt_shop_giam_them_den_10percent_laptop_cho_hoc_sinh_sinh_vien_209114_1_208376858d.jpg',
         url: 'https://fptshop.com.vn/tin-tuc/tin-khuyen-mai/fpt-shop-giam-them-den-10percent-laptop-cho-hoc-sinh-sinh-vien-209114',
-        source: 'FPT Shop, 7/7/2026',
       },
       {
-        id: 'fpt-b2s-phone',
+        id: 6,
         date: '2026-08-13',
         time: '11:00',
         type: 'promo',
@@ -128,10 +123,9 @@ export const COMPETITORS_DATA = [
         desc: 'Theo đó, từ nay đến hết ngày 30.09.2026, khi mua bất kỳ điện thoại Android nào tại hệ thống FPT Shop và xuất trình thẻ học sinh - sinh viên hoặc giấy tờ nhập học có hiệu lực, khách hàng sẽ được giảm thêm 3% tối đa lên đến 500.000 đồng.',
         image: 'https://kenh14cdn.com/203336854389633024/2025/8/26/photo-1-17562010806721408540305-1756209136244-1756209136549349526325.jpg',
         url: 'https://fptshop.com.vn',
-        source: 'FPT Shop, 8/2026',
       },
       {
-        id: 'fpt-live-watch',
+        id: 7,
         date: '2026-08-22',
         time: '20:00',
         type: 'live',
@@ -139,10 +133,9 @@ export const COMPETITORS_DATA = [
         desc: 'Săn deal Apple Watch Series 10 và nhiều phụ kiện chính hãng khác trực tiếp trên sóng livestream độc quyền của FPT Shop.',
         image: 'https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/fpt_shop_giam_them_den_10percent_laptop_cho_hoc_sinh_sinh_vien_209114_1_208376858d.jpg',
         url: 'https://fptshop.com.vn',
-        source: 'FPT Shop Live',
       },
       {
-        id: 'fpt-ads-tiktok',
+        id: 8,
         date: '2026-08-05',
         time: '09:00',
         type: 'ads',
@@ -150,7 +143,6 @@ export const COMPETITORS_DATA = [
         desc: 'FPT Shop phát động thử thách nhảy trên nền nhạc sôi động cùng nhiều phần quà hấp dẫn, tăng cường hiện diện thương hiệu với học sinh sinh viên.',
         image: 'https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/fpt_shop_giam_them_den_10percent_laptop_cho_hoc_sinh_sinh_vien_209114_1_208376858d.jpg',
         url: 'https://fptshop.com.vn',
-        source: 'FPT Shop Social',
       }
     ],
   },
@@ -163,7 +155,7 @@ export const COMPETITORS_DATA = [
     stats: { promo: 2, ads: 1 },
     events: [
       {
-        id: 'tgdd-doidiem',
+        id: 9,
         date: '2026-08-13',
         time: '10:00',
         type: 'promo',
@@ -171,10 +163,9 @@ export const COMPETITORS_DATA = [
         desc: 'Không chỉ dùng để xét tuyển đại học, điểm thi THPT năm nay còn mang lại giá trị thực tế ngay lập tức cho các bạn trẻ. Cụ thể, từ ngày 1/7 đến hết 31/7, các sĩ tử có thể dùng chính điểm thi THPT Quốc gia 2026 của mình để tham gia chương trình quy đổi lấy voucher giảm giá lên đến 3 triệu đồng.',
         image: 'https://media.phunumoi.net.vn/files/phuongvika/2026/07/02/image1-182655.jpg',
         url: 'https://thegioididong.com',
-        source: 'Thế Giới Di Động, 2/7/2026',
       },
       {
-        id: 'tgdd-topzone',
+        id: 10,
         date: '2026-08-22',
         time: '09:00',
         type: 'promo',
@@ -182,10 +173,9 @@ export const COMPETITORS_DATA = [
         desc: 'Thế Giới Di Động tưng bừng khai trương chuỗi cửa hàng ủy quyền cao cấp Apple TopZone thứ 100 với hàng ngàn khuyến mãi hấp dẫn cho iPhone, iPad và Macbook.',
         image: 'https://media.phunumoi.net.vn/files/phuongvika/2026/07/02/image1-182655.jpg',
         url: 'https://thegioididong.com',
-        source: 'TopZone, 22/8/2026',
       },
       {
-        id: 'tgdd-ads-fb',
+        id: 11,
         date: '2026-08-10',
         time: '14:00',
         type: 'ads',
@@ -193,7 +183,6 @@ export const COMPETITORS_DATA = [
         desc: 'Chiến dịch truyền thông mạng xã hội và biển quảng cáo ngoài trời cho dòng iPhone 15 Pro Max tại 63 tỉnh thành toàn quốc.',
         image: 'https://media.phunumoi.net.vn/files/phuongvika/2026/07/02/image1-182655.jpg',
         url: 'https://thegioididong.com',
-        source: 'Facebook',
       }
     ],
   },
@@ -206,7 +195,7 @@ export const COMPETITORS_DATA = [
     stats: { promo: 1, release: 1 },
     events: [
       {
-        id: 'hh-b2s',
+        id: 12,
         date: '2026-08-13',
         time: '09:30',
         type: 'promo',
@@ -214,10 +203,9 @@ export const COMPETITORS_DATA = [
         desc: 'Chào đón mùa tựu trường 2026, Hoàng Hà Mobile mang đến loạt ưu đãi dành riêng cho học sinh, sinh viên: Voucher giảm 30% (tối đa 10 triệu đồng) vinh danh thủ khoa, đổi điểm lấy ưu đãi tới 1 triệu đồng, đặc quyền EDU cùng vòng quay may mắn.',
         image: 'https://hoanghamobile.com/tin-tuc/wp-content/webp-express/webp-images/uploads/2026/06/Chuong-trinh-voucher-danh-cho-thu-khoa-01-2.jpg.webp',
         url: 'https://hoanghamobile.com',
-        source: 'Hoàng Hà Mobile, 13/6/2026',
       },
       {
-        id: 'hh-note14',
+        id: 13,
         date: '2026-08-10',
         time: '08:00',
         type: 'release',
@@ -225,7 +213,6 @@ export const COMPETITORS_DATA = [
         desc: 'Hoàng Hà Mobile chính thức mở bán sản phẩm Redmi Note 14 Pro mới nhất kèm bộ quà tặng độc quyền, trợ giá 1 triệu đồng và trả góp 0%.',
         image: 'https://hoanghamobile.com/tin-tuc/wp-content/webp-express/webp-images/uploads/2026/06/Chuong-trinh-voucher-danh-cho-thu-khoa-01-2.jpg.webp',
         url: 'https://hoanghamobile.com',
-        source: 'Hoàng Hà Mobile',
       }
     ],
   },
@@ -238,7 +225,7 @@ export const COMPETITORS_DATA = [
     stats: { promo: 2 },
     events: [
       {
-        id: 'nk-redreturn',
+        id: 14,
         date: '2026-08-13',
         time: '14:00',
         type: 'promo',
@@ -246,10 +233,9 @@ export const COMPETITORS_DATA = [
         desc: 'Tháng 8 này, Nguyễn Kim ra mắt diện mạo Nguyễn Kim Prime cùng chiến dịch "Red Return", mang đến hàng loạt chính sách mua sắm và dịch vụ chuẩn mực mới.',
         image: 'https://images2.thanhnien.vn/528068263637045248/2026/8/4/nk-1-1785844302825693216989.jpg',
         url: 'https://nguyenkim.com',
-        source: 'Thanh Niên, 8/2026',
       },
       {
-        id: 'nk-national-day',
+        id: 15,
         date: '2026-08-27',
         time: '08:30',
         type: 'promo',
@@ -257,7 +243,6 @@ export const COMPETITORS_DATA = [
         desc: 'Nguyễn Kim tung chương trình giảm giá cực sốc lên đến 50% cho các sản phẩm điện máy gia dụng, điện thoại và laptop mừng lễ Quốc Khánh.',
         image: 'https://images2.thanhnien.vn/528068263637045248/2026/8/4/nk-1-1785844302825693216989.jpg',
         url: 'https://nguyenkim.com',
-        source: 'Nguyễn Kim, 27/8/2026',
       }
     ],
   },
