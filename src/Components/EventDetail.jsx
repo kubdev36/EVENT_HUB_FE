@@ -7,27 +7,16 @@ export default function EventDetail({ data, onClose }) {
 
   if (!data) return null;
 
-  const getWeekdayName = (date) => {
-    const days = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    return days[date.getDay()];
-  };
-
-  const formatDateString = (date) => {
-    if (!date) return '13/08/2026 (Thứ 5)';
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year} (${getWeekdayName(date)})`;
-  };
-
-  const getEventDate = () => {
+  const getFormattedDate = () => {
     const dateStr = data.events?.[0]?.date;
-    if (!dateStr) return null;
-    const [year, month, day] = dateStr.split('-').map(Number);
-    return new Date(year, month - 1, day);
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-');
+    const date = new Date(Number(y), Number(m) - 1, Number(d));
+    const weekdays = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    return `${d}/${m}/${y} (${weekdays[date.getDay()]})`;
   };
 
-  const formattedDate = formatDateString(getEventDate());
+  const formattedDate = getFormattedDate();
 
   return (
     <div className="w-[380px] xl:w-[420px] shrink-0 bg-white border-l border-slate-200 h-screen flex flex-col justify-between shadow-lg z-30 select-none overflow-hidden">
