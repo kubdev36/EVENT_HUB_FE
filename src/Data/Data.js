@@ -56,7 +56,7 @@ export const COMPETITORS_DATA = [
     events: [
       {
         id: 1,
-        date: '2026-08-13',
+        date: '2026-08-22',
         time: '09:00',
         type: 'release',
         title: 'CellphoneS triển khai loạt ưu đãi mùa tựu trường 2026"',
@@ -66,7 +66,7 @@ export const COMPETITORS_DATA = [
       },
       {
         id: 2,
-        date: '2026-08-13',
+        date: '2026-08-22',
         time: '12:00',
         type: 'promo',
         title: 'Ưu đãi S-Student / S-Teacher mùa tựu trường',
@@ -76,7 +76,7 @@ export const COMPETITORS_DATA = [
       },
       {
         id: 3,
-        date: '2026-08-22',
+        date: '2026-08-13',
         time: '10:00',
         type: 'release',
         title: 'CellphoneS mở bán sớm Galaxy Z Fold6 / Flip6 với ưu đãi cực khủng',
