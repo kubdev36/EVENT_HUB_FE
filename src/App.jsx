@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Layout from './Layout/Layout';
 
-// Import các Views
 import Daily from './Views/Daily';
 import Month from './Views/Month';
 import OverView from './Views/OverView';
@@ -16,7 +15,6 @@ import Setting from './Views/Setting';
 export default function App() {
   const [currentView, setCurrentView] = useState('daily');
 
-  // Hàm render view tương ứng theo state
   const renderView = () => {
     switch (currentView) {
       case 'daily': return <Daily />;

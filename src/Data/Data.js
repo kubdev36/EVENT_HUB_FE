@@ -4,6 +4,7 @@ export const LOGOS = {
   tgdd: '/img/tgdd.jpg',
   hoangha: '/img/hoangha.jpg',
   nguyenkim: '/img/nguyenkim.png',
+  minhtuan: '/img/mtm.jpg'
 };
 
 export const CATEGORY_STYLES = {
@@ -45,7 +46,7 @@ export const CATEGORY_STYLES = {
   },
 };
 
-export const COMPETITORS_DATA = [
+export const EVENTS_DATA = [
   {
     id: 'cellphones',
     name: 'CellphoneS',
@@ -53,13 +54,18 @@ export const COMPETITORS_DATA = [
     logo: LOGOS.cellphones,
     totalEvents: 4,
     stats: { release: 2, promo: 1, internal: 1 },
+    targetUrls: [
+      'https://cellphones.com.vn/khuyen-mai-hot',
+      'https://cellphones.com.vn/sforum/tin-khuyen-mai',
+    ],
+    fbFanpage: 'https://facebook.com/CellphoneSVietnam',
     events: [
       {
         id: 1,
         date: '2026-08-22',
         time: '09:00',
         type: 'release',
-        title: 'CellphoneS triển khai loạt ưu đãi mùa tựu trường 2026"',
+        title: 'CellphoneS triển khai loạt ưu đãi mùa tựu trường 2026',
         desc: 'Học sinh, sinh viên, giáo viên có cơ hội giảm thêm 10% khi mua thiết bị công nghệ, nhận voucher ba triệu đồng, quà tặng và trợ giá lên đời máy tại CellphoneS.',
         image: 'https://i1-vnexpress.vnecdn.net/2026/06/30/image001-1782808879-4903-1782809202.jpg?w=1020&h=0&q=100&dpr=1&fit=crop&s=lUmIOvY2Hy5xG0Ggbo7z1w',
         url: 'https://vnexpress.net/cellphones-trien-khai-loat-uu-dai-mua-tuu-truong-2026-5091632.html',
@@ -93,8 +99,8 @@ export const COMPETITORS_DATA = [
         desc: 'Hoạt động thể thao thường niên nhằm nâng cao tinh thần đồng đội và rèn luyện sức khỏe cho toàn thể nhân viên CellphoneS khu vực phía Nam.',
         image: 'https://i1-vnexpress.vnecdn.net/2026/06/30/image001-1782808879-4903-1782809202.jpg?w=1020&h=0&q=100&dpr=1&fit=crop&s=lUmIOvY2Hy5xG0Ggbo7z1w',
         url: '',
-      }
-    ]
+      },
+    ],
   },
   {
     id: 'fpt',
@@ -103,6 +109,11 @@ export const COMPETITORS_DATA = [
     logo: LOGOS.fpt,
     totalEvents: 4,
     stats: { promo: 2, live: 1, ads: 1 },
+    targetUrls: [
+      'https://fptshop.com.vn/tin-tuc/khuyen-mai',
+      'https://fptshop.com.vn/tin-tuc/tin-moi',
+    ],
+    fbFanpage: 'https://facebook.com/FPTShopOnline',
     events: [
       {
         id: 5,
@@ -143,7 +154,7 @@ export const COMPETITORS_DATA = [
         desc: 'FPT Shop phát động thử thách nhảy trên nền nhạc sôi động cùng nhiều phần quà hấp dẫn, tăng cường hiện diện thương hiệu với học sinh sinh viên.',
         image: 'https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/fpt_shop_giam_them_den_10percent_laptop_cho_hoc_sinh_sinh_vien_209114_1_208376858d.jpg',
         url: 'https://fptshop.com.vn',
-      }
+      },
     ],
   },
   {
@@ -153,6 +164,11 @@ export const COMPETITORS_DATA = [
     logo: LOGOS.tgdd,
     totalEvents: 3,
     stats: { promo: 2, ads: 1 },
+    targetUrls: [
+      'https://thegioididong.com/tin-tuc/khuyen-mai',
+      'https://thegioididong.com/tin-tuc/su-kien-ra-mat',
+    ],
+    fbFanpage: 'https://facebook.com/TheGioiDiDong',
     events: [
       {
         id: 9,
@@ -183,7 +199,7 @@ export const COMPETITORS_DATA = [
         desc: 'Chiến dịch truyền thông mạng xã hội và biển quảng cáo ngoài trời cho dòng iPhone 15 Pro Max tại 63 tỉnh thành toàn quốc.',
         image: 'https://media.phunumoi.net.vn/files/phuongvika/2026/07/02/image1-182655.jpg',
         url: 'https://thegioididong.com',
-      }
+      },
     ],
   },
   {
@@ -193,6 +209,11 @@ export const COMPETITORS_DATA = [
     logo: LOGOS.hoangha,
     totalEvents: 2,
     stats: { promo: 1, release: 1 },
+    targetUrls: [
+      'https://hoanghamobile.com/tin-tuc/khuyen-mai',
+      'https://hoanghamobile.com/tin-tuc/chuyen-trang-apple',
+    ],
+    fbFanpage: 'https://facebook.com/hoanghamobilecom',
     events: [
       {
         id: 12,
@@ -213,7 +234,7 @@ export const COMPETITORS_DATA = [
         desc: 'Hoàng Hà Mobile chính thức mở bán sản phẩm Redmi Note 14 Pro mới nhất kèm bộ quà tặng độc quyền, trợ giá 1 triệu đồng và trả góp 0%.',
         image: 'https://hoanghamobile.com/tin-tuc/wp-content/webp-express/webp-images/uploads/2026/06/Chuong-trinh-voucher-danh-cho-thu-khoa-01-2.jpg.webp',
         url: 'https://hoanghamobile.com',
-      }
+      },
     ],
   },
   {
@@ -223,6 +244,11 @@ export const COMPETITORS_DATA = [
     logo: LOGOS.nguyenkim,
     totalEvents: 2,
     stats: { promo: 2 },
+    targetUrls: [
+      'https://nguyenkim.com/tin-khuyen-mai.html',
+      'https://nguyenkim.com/tin-tuc/cong-nghe',
+    ],
+    fbFanpage: 'https://facebook.com/NguyenKimMobile',
     events: [
       {
         id: 14,
@@ -243,9 +269,75 @@ export const COMPETITORS_DATA = [
         desc: 'Nguyễn Kim tung chương trình giảm giá cực sốc lên đến 50% cho các sản phẩm điện máy gia dụng, điện thoại và laptop mừng lễ Quốc Khánh.',
         image: 'https://images2.thanhnien.vn/528068263637045248/2026/8/4/nk-1-1785844302825693216989.jpg',
         url: 'https://nguyenkim.com',
-      }
+      },
+    ],
+  },
+  {
+    id: 'minhtuan',
+    name: 'Minh Tuấn Mobile',
+    tag: 'Nội bộ',
+    logo: LOGOS.minhtuan,
+    totalEvents: 3,
+    stats: { internal: 2, release: 1 },
+    targetUrls: [
+      'https://minhtuanmobile.com/tin-tuc/',
+      'https://minhtuanmobile.com/khuyen-mai/',
+    ],
+    fbFanpage: 'https://facebook.com/minhtuanmobilesg',
+    events: [
+      {
+        id: 16,
+        date: '2026-08-24',
+        time: '01:00',
+        type: 'internal',
+        title: 'Sale dịp lễ Deal hời phơi phới ưu đãi giảm đến 1,2 triệu',
+        desc: 'Hòa chung không khí tưng bừng mừng đại lễ Quốc khánh, Minh Tuấn Mobile mang đến chương trình khuyến mãi mua sắm Sắc Việt Rạng Ngời - Deal Hời Phơi Phới. Đây là thời điểm vàng để người dùng cập nhật những thiết bị công nghệ hiện đại, từ smartphone, máy tính bảng, laptop cho đến hệ sinh thái phụ kiện âm thanh đỉnh cao với mức chi phí tối ưu.',
+        image: 'https://minhtuanmobile.com/uploads/blog/sac-viet-rang-ngoi-260824103455.png',
+        url: 'https://minhtuanmobile.com/tin-tuc/chuong-trinh-sale-dip-le/',
+      },
+      {
+        id: 17,
+        date: '2026-08-22',
+        time: '09:00',
+        type: 'internal',
+        title: 'Đổi phụ kiện cũ, lấy phụ kiện mới - Giảm đến 50% giá gốc tại Minh Tuấn Mobile',
+        desc: 'Để hỗ trợ khách hàng tối ưu hóa chi phí và xử lý các thiết bị điện tử đã qua sử dụng, Minh Tuấn Mobile mang đến chương trình DriveGreen - Đổi cũ nhận mới, mang đến giải pháp "lên đời" toàn diện cho các loại phụ kiện công nghệ. Với thông điệp hỗ trợ người dùng tiếp cận sản phẩm chính hãng, chất lượng cao, chương trình hứa hẹn mang đến những đặc quyền ưu đãi cực cùng quà tặng cho mọi khách hàng tham gia.',
+        image: 'https://minhtuanmobile.com/uploads/blog/thu-cu-do-i-mo-i-dtr-800x450-260604100640.jpg',
+        url: 'https://minhtuanmobile.com/tin-tuc/doi-phu-kien-cu-lay-phu-kien-moi-tai-minh-tuan-mobile/',
+      },
+      {
+        id: 18,
+        date: '2026-08-27',
+        time: '08:00',
+        type: 'release',
+        title: 'Đổi điểm thi THPT 2026 nhận ngay siêu ưu đãi tại Minh Tuấn Mobile',
+        desc: 'Để chúc mừng những nỗ lực của các sĩ tử sau kỳ thi tốt nghiệp THPT quốc gia 2026, Minh Tuấn Mobile khởi động chương trình ưu đãi Đổi điểm CAO - Deal cực WOW. Đây là cơ hội để các bạn học sinh quy đổi thành quả học tập của mình thành mức giảm giá trực tiếp khi mua sắm các thiết bị công nghệ và phụ kiện đời mới. Chương trình không chỉ là món quà khích lệ tinh thần mà còn giúp tối ưu hóa chi phí mua sắm hành trang học tập cho năm học mới. ',
+        image: 'https://minhtuanmobile.com/uploads/blog/doi-diem-cao-deal-cuc-wow-2-260711093230.png',
+        url: 'https://minhtuanmobile.com/tin-tuc/doi-diem-cao-deal-cuc-wow/',
+      },
     ],
   },
 ];
 
+export const COMPETITORS_DATA = EVENTS_DATA;
 
+export const INITIAL_USERS = [
+  { id: 1, name: 'Nguyễn Trần Đăng Khoa', email: 'kub336655@gmail.com', department: 'Phòng IT', role: 'Admin', status: 'active' },
+  { id: 2, name: 'Nguyễn Văn A', email: 'a@minhtuanmobile.com', department: 'Phòng Marketing', role: 'Staff', status: 'active' },
+  { id: 3, name: 'Nguyễn Thị B', email: 'b@minhtuanmobile.com', department: 'Phòng Kinh doanh', role: 'Staff', status: 'inactive' },
+];
+
+export const INITIAL_TELEGRAM_CONFIG = {
+  botToken: '6892348123:AAFnK_23kLx_ExampleToken',
+  chatId: '-1002348920192',
+  channelName: 'Minh Tuấn Mobile - Cảnh báo Đối thủ',
+  notifyImmediately: true,
+  includeImage: true,
+};
+
+export const KEYWORD_RULES = [
+  { type: 'promo', label: 'Khuyến mãi', keywords: 'giảm giá, voucher, ưu đãi, sale, deal, trợ giá, quà tặng, 0%' },
+  { type: 'release', label: 'Ra mắt / Mở bán', keywords: 'mở bán, ra mắt, chính thức, đặt trước, preorder, unbox' },
+  { type: 'live', label: 'Livestream', keywords: 'livestream, live, săn deal, phát trực tiếp, tiktok live' },
+  { type: 'ads', label: 'Quảng cáo', keywords: 'chiến dịch, tvc, dance challenge, minigame, viral' },
+];

@@ -4,27 +4,37 @@ import { CATEGORY_STYLES } from '../Data/Data';
 
 export default function EventCard({ data, onOpenDetail }) {
   return (
-    <div className="grid grid-cols-[160px_1fr_150px] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs hover:border-slate-300 transition-all">
+    <div className="flex flex-col md:grid md:grid-cols-[160px_1fr_150px] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs hover:border-slate-300 transition-all">
       <div 
         onClick={() => onOpenDetail?.(data)}
-        className="p-3.5 border-r border-slate-100 flex flex-col justify-center items-start cursor-pointer hover:bg-slate-50/50 transition-colors select-none"
+        className="p-3 sm:p-3.5 border-b md:border-b-0 md:border-r border-slate-100 flex flex-row md:flex-col justify-between md:justify-center items-center md:items-start cursor-pointer hover:bg-slate-50/50 transition-colors select-none"
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 min-w-0">
           <img
             src={data.logo}
             alt={data.name}
-            className="w-9 h-9 rounded-lg object-cover border border-slate-200 shrink-0 shadow-xs"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg object-contain border border-slate-200 p-0.5 bg-white shrink-0 shadow-xs"
           />
           <div className="min-w-0">
             <div className="text-xs font-bold text-slate-900 leading-snug truncate">{data.name}</div>
-            <div className="text-[11px] text-slate-400 font-medium">{data.totalEvents} sự kiện</div>
+            <div className="text-[10px] sm:text-[11px] text-slate-400 font-medium">{data.totalEvents} sự kiện</div>
           </div>
         </div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenDetail?.(data);
+          }}
+          className="md:hidden text-[11px] font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-0.5 shrink-0"
+        >
+          <span>Chi tiết</span>
+          <ChevronRight size={13} />
+        </button>
       </div>
 
-
-      <div className="p-3">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-2.5">
+      <div className="p-2.5 sm:p-3 flex-1 min-w-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2.5">
           {data.events.map((event) => {
             const style = CATEGORY_STYLES[event.type] || CATEGORY_STYLES.release;
             return (
@@ -59,8 +69,7 @@ export default function EventCard({ data, onOpenDetail }) {
                   </div>
                 </div>
 
-             
-                <div className="h-20 w-full rounded-md overflow-hidden bg-slate-100 border border-slate-100 shrink-0 select-none">
+                <div className="h-24 sm:h-20 w-full rounded-md overflow-hidden bg-slate-100 border border-slate-100 shrink-0 select-none">
                   <img
                     src={event.image}
                     alt={event.title}
@@ -74,14 +83,13 @@ export default function EventCard({ data, onOpenDetail }) {
         </div>
       </div>
 
-     
-      <div className="p-3.5 border-l border-slate-100 flex flex-col justify-between bg-slate-50/20">
+      <div className="hidden md:flex p-3.5 border-l border-slate-100 flex-col justify-between bg-slate-50/20">
         <div>
           <div className="text-xs font-bold text-slate-900 mb-2">
             {data.totalEvents} sự kiện
           </div>
           <div className="space-y-1.5 text-[11px] font-medium text-slate-600">
-            {Object.entries(data.stats).map(([key, count]) => {
+            {Object.entries(data.stats || {}).map(([key, count]) => {
               if (!count) return null;
               const style = CATEGORY_STYLES[key];
               if (!style) return null;
@@ -97,7 +105,7 @@ export default function EventCard({ data, onOpenDetail }) {
 
         <button
           onClick={() => onOpenDetail?.(data)}
-          className="mt-2 text-[11px] font-semibold text-[#1877f2] hover:text-blue-700 flex items-center gap-1 self-start"
+          className="mt-2 text-[11px] font-semibold text-[#1877f2] hover:text-blue-700 flex items-center gap-1 self-start cursor-pointer"
         >
           <span>Xem chi tiết</span>
           <ChevronRight size={13} />

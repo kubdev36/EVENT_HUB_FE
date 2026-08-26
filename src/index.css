@@ -11,7 +11,6 @@
     box-sizing: border-box;
   }
 
-  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -37,7 +36,6 @@ body,
   background-color: #f8fafc;
 }
 
-/* DayPicker v10 full width and cell stretching overrides */
 .rdp-root {
   width: 100% !important;
   max-width: none !important;

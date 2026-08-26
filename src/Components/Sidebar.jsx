@@ -11,8 +11,8 @@ import {
   FileText, 
   Settings, 
   Plus, 
-  ChevronDown,
-  Check
+  Check,
+  X
 } from 'lucide-react';
 import { COMPETITORS_DATA } from '../Data/Data';
 
@@ -37,7 +37,7 @@ const QUICK_FILTERS = [
   { id: 'internal', label: 'Sự kiện nội bộ', color: 'bg-purple-600 border-purple-600' },
 ];
 
-export default function Sidebar({ currentView = 'daily', onNavigate }) {
+export default function Sidebar({ currentView = 'daily', onNavigate, isOpen, onClose }) {
   const [checkedFilters, setCheckedFilters] = React.useState({
     all: true,
     mkt: true,
@@ -50,97 +50,119 @@ export default function Sidebar({ currentView = 'daily', onNavigate }) {
     setCheckedFilters(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const handleItemClick = (id) => {
+    onNavigate?.(id);
+    onClose?.();
+  };
+
   return (
-    <aside className="w-[240px] shrink-0 border-r border-slate-200 bg-white flex flex-col justify-between h-screen overflow-y-auto select-none">
-      <div>
-     
-        <div className="h-16 px-4 flex items-center gap-3 border-b border-slate-100">
-          <img src="/img/mtm.jpg" alt="" className="w-10 h-10" />
-          <div>
-            <div className="text-[14px] font-bold text-slate-900 leading-tight">Event Hub</div>
-            <div className="text-[10px] font-medium text-slate-400 leading-tight">Intelligence Center</div>
-          </div>
-        </div>
+    <>
+      {isOpen && (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs lg:hidden transition-opacity"
+        />
+      )}
 
-        
-        <div className="p-3">
-          <nav className="space-y-0.5">
-            {MENU_ITEMS.map((item) => {
-              const Icon = item.icon;
-              const active = currentView === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => onNavigate?.(item.id)}
-                  className={`w-full h-9 rounded-lg px-3 flex items-center gap-3 text-[13px] font-medium transition-all ${
-                    active
-                      ? 'bg-[#1877f2] text-white shadow-sm font-semibold'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-                >
-                  <Icon size={16} className={active ? 'text-white' : 'text-slate-500'} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className="mt-5 pt-4 border-t border-slate-100">
-            <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2 px-1">
-              Bộ lọc nhanh
+      <aside
+        className={`fixed lg:static top-0 left-0 z-50 w-60 shrink-0 border-r border-slate-200 bg-white flex flex-col justify-between h-screen overflow-y-auto select-none transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
+        <div>
+          <div className="h-16 px-4 flex items-center justify-between border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <img src="/img/mtm.jpg" alt="Logo" className="w-9 h-9 rounded-lg object-contain border border-slate-100 shadow-2xs" />
+              <div>
+                <div className="text-[14px] font-bold text-slate-900 leading-tight">Event Hub</div>
+                <div className="text-[10px] font-medium text-slate-400 leading-tight">Intelligence Center</div>
+              </div>
             </div>
-            <div className="space-y-1.5 px-1">
-              {QUICK_FILTERS.map((item) => {
-                const isChecked = checkedFilters[item.id];
+
+            <button
+              onClick={onClose}
+              className="lg:hidden p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <div className="p-3">
+            <nav className="space-y-0.5">
+              {MENU_ITEMS.map((item) => {
+                const Icon = item.icon;
+                const active = currentView === item.id;
                 return (
-                  <div
+                  <button
                     key={item.id}
-                    onClick={() => toggleFilter(item.id)}
-                    className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700 py-0.5 hover:text-slate-900"
+                    onClick={() => handleItemClick(item.id)}
+                    className={`w-full h-9 rounded-lg px-3 flex items-center gap-3 text-[13px] font-medium transition-all cursor-pointer ${
+                      active
+                        ? 'bg-[#1877f2] text-white shadow-xs font-semibold'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    }`}
                   >
-                    <div
-                      className={`w-3.5 h-3.5 rounded flex items-center justify-center text-white border transition-colors ${
-                        isChecked ? item.color : 'border-slate-300 bg-white'
-                      }`}
-                    >
-                      {isChecked && <Check size={10} strokeWidth={3} />}
-                    </div>
+                    <Icon size={16} className={active ? 'text-white' : 'text-slate-500'} />
                     <span>{item.label}</span>
-                  </div>
+                  </button>
                 );
               })}
-            </div>
-          </div>
+            </nav>
 
-       
-          <div className="mt-5 pt-4 border-t border-slate-100">
-            <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2 px-1">
-              Đối thủ nổi bật
+            <div className="mt-5 pt-4 border-t border-slate-100">
+              <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2 px-1">
+                Bộ lọc nhanh
+              </div>
+              <div className="space-y-1.5 px-1">
+                {QUICK_FILTERS.map((item) => {
+                  const isChecked = checkedFilters[item.id];
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => toggleFilter(item.id)}
+                      className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700 py-0.5 hover:text-slate-900 select-none"
+                    >
+                      <div
+                        className={`w-3.5 h-3.5 rounded flex items-center justify-center text-white border transition-colors ${
+                          isChecked ? item.color : 'border-slate-300 bg-white'
+                        }`}
+                      >
+                        {isChecked && <Check size={10} strokeWidth={3} />}
+                      </div>
+                      <span>{item.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <div className="space-y-1">
-              {COMPETITORS_DATA.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-2.5 px-1 py-1 rounded-md hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700"
-                >
-                  <img
-                    src={item.logo}
-                    alt={item.name}
-                    className="w-4 h-4 rounded object-cover border border-slate-100"
-                  />
-                  <span className="truncate">{item.name}</span>
-                </div>
-              ))}
-              <button className="w-full text-left flex items-center gap-1.5 px-1 py-1.5 text-xs font-semibold text-[#1877f2] hover:text-blue-700 mt-1">
-                <Plus size={14} />
-                <span>Thêm đối thủ</span>
-              </button>
+
+            <div className="mt-5 pt-4 border-t border-slate-100">
+              <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2 px-1">
+                Đối thủ nổi bật
+              </div>
+              <div className="space-y-1">
+                {COMPETITORS_DATA.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-2.5 px-1 py-1 rounded-md hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700 transition"
+                  >
+                    <img
+                      src={item.logo}
+                      alt={item.name}
+                      className="w-4 h-4 rounded object-contain border border-slate-100 bg-white"
+                    />
+                    <span className="truncate">{item.name}</span>
+                  </div>
+                ))}
+                <button className="w-full text-left flex items-center gap-1.5 px-1 py-1.5 text-xs font-semibold text-[#1877f2] hover:text-blue-700 mt-1 cursor-pointer">
+                  <Plus size={14} />
+                  <span>Thêm đối thủ</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      
-    </aside>
+      </aside>
+    </>
   );
 }
