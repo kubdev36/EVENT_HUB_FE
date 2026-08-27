@@ -1,9 +1,30 @@
 import React, { useState } from 'react';
-import { Bot, Users, Send, Sliders, Plus, Edit2, Trash2, KeyRound, Play, Clock } from 'lucide-react';
-import { EVENTS_DATA, INITIAL_USERS, INITIAL_TELEGRAM_CONFIG, KEYWORD_RULES } from '../Data/Data';
+import { createPortal } from 'react-dom';
+import {
+  Bot,
+  Users,
+  Send,
+  Sliders,
+  Plus,
+  Edit2,
+  Trash2,
+  KeyRound,
+  Play,
+  Clock,
+  CheckCircle2,
+  X,
+  Loader2,
+  ArrowRight,
+  ExternalLink,
+  AlertTriangle,
+} from 'lucide-react';
+import { EVENTS_DATA, INITIAL_USERS, INITIAL_TELEGRAM_CONFIG, KEYWORD_RULES, CATEGORY_STYLES } from '../Data/Data';
 
 export default function Setting() {
   const [activeTab, setActiveTab] = useState('crawler');
+  const [crawlTarget, setCrawlTarget] = useState(null);
+  const [crawlLoading, setCrawlLoading] = useState(false);
+  const [crawlResult, setCrawlResult] = useState(null);
 
   const [crawlers, setCrawlers] = useState(
     EVENTS_DATA.filter((item) => item.id !== 'minhtuan').map((comp) => ({
@@ -14,7 +35,7 @@ export default function Setting() {
       interval: '6h',
       lastRun: '13:45 - 25/08/2026',
       targetUrls: comp.targetUrls || [],
-      fbFanpage: comp.fbFanpage || '',
+      events: comp.events || [],
     }))
   );
 
@@ -22,8 +43,125 @@ export default function Setting() {
   const [telegramConfig, setTelegramConfig] = useState(INITIAL_TELEGRAM_CONFIG);
   const [keywordRules, setKeywordRules] = useState(KEYWORD_RULES);
 
+  const [modalMode, setModalMode] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [formData, setFormData] = useState({});
+
+  const openCrawlPopup = (crawler) => {
+    setCrawlTarget(crawler);
+    setCrawlResult(null);
+  };
+
+  const runCrawl = () => {
+    if (!crawlTarget) return;
+    setCrawlLoading(true);
+    window.setTimeout(() => {
+      setCrawlLoading(false);
+      
+      const sortedEvents = [...(crawlTarget.events || [])].sort((a, b) => {
+        const dateTimeA = new Date(`${a.date || '1970-01-01'}T${a.time || '00:00'}`);
+        const dateTimeB = new Date(`${b.date || '1970-01-01'}T${b.time || '00:00'}`);
+        return dateTimeA - dateTimeB;
+      });
+
+      setCrawlResult({ items: sortedEvents });
+    }, 1200);
+  };
+
+  const closePopup = () => {
+    setCrawlTarget(null);
+    setCrawlLoading(false);
+    setCrawlResult(null);
+  };
+
+  const formatEventDate = (dateStr) => {
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-');
+    if (!y || !m || !d) return dateStr;
+    return `${d}/${m}/${y}`;
+  };
+
+  const handleOpenModal = (mode, item = null) => {
+    setModalMode(mode);
+    setSelectedItem(item);
+    if (item) {
+      setFormData({ 
+        ...item, 
+        password: item.password || '••••••••',
+        targetUrls: item.targetUrls ? [...item.targetUrls] : [''] 
+      });
+    } else {
+      if (mode === 'add-crawler') setFormData({ name: '', logo: '', interval: '6h', targetUrls: [''] });
+      if (mode === 'add-user') setFormData({ name: '', email: '', password: '', department: 'MKT', role: 'Staff' });
+    }
+  };
+
+  const handleCloseModal = () => {
+    setModalMode(null);
+    setSelectedItem(null);
+    setFormData({});
+  };
+
+  const handleAddUrlField = () => {
+    const urls = formData.targetUrls || [];
+    setFormData({ ...formData, targetUrls: [...urls, ''] });
+  };
+
+  const handleUrlChange = (index, value) => {
+    const urls = [...(formData.targetUrls || [])];
+    urls[index] = value;
+    setFormData({ ...formData, targetUrls: urls });
+  };
+
+  const handleRemoveUrlField = (index) => {
+    const urls = [...(formData.targetUrls || [])];
+    urls.splice(index, 1);
+    setFormData({ ...formData, targetUrls: urls.length ? urls : [''] });
+  };
+
+  const handleSaveData = () => {
+    if (modalMode === 'add-crawler') {
+      const newCrawler = {
+        id: Date.now().toString(),
+        name: formData.name || 'Đối thủ mới',
+        logo: formData.logo || '/img/mtm.jpg',
+        enabled: true,
+        interval: formData.interval || '6h',
+        lastRun: 'Chưa chạy',
+        targetUrls: formData.targetUrls?.filter((u) => u.trim() !== '') || [],
+        events: [],
+      };
+      setCrawlers([...crawlers, newCrawler]);
+    } else if (modalMode === 'edit-crawler') {
+      const updatedCrawler = {
+        ...formData,
+        targetUrls: formData.targetUrls?.filter((u) => u.trim() !== '') || [],
+      };
+      setCrawlers(crawlers.map(c => c.id === selectedItem.id ? { ...c, ...updatedCrawler } : c));
+    } else if (modalMode === 'delete-crawler') {
+      setCrawlers(crawlers.filter(c => c.id !== selectedItem.id));
+    } else if (modalMode === 'add-user') {
+      const newUser = {
+        id: Date.now().toString(),
+        name: formData.name || 'Nhân viên mới',
+        email: formData.email || 'staff@company.com',
+        password: formData.password || 'EventHub@2026',
+        department: formData.department || 'MKT',
+        role: formData.role || 'Staff',
+      };
+      setUsers([...users, newUser]);
+    } else if (modalMode === 'edit-user') {
+      setUsers(users.map(u => u.id === selectedItem.id ? { ...u, ...formData } : u));
+    } else if (modalMode === 'delete-user') {
+      setUsers(users.filter(u => u.id !== selectedItem.id));
+    } else if (modalMode === 'edit-keyword') {
+      setKeywordRules(keywordRules.map((k, idx) => idx === selectedItem.idx ? { ...k, keywords: formData.keywords } : k));
+    }
+    handleCloseModal();
+  };
+
   return (
-    <div className="flex flex-col h-full min-h-0 w-full bg-slate-50 text-slate-800 overflow-hidden font-sans">
+    <div className="flex flex-col w-full bg-slate-50 text-slate-800 font-sans pb-10">
       <div className="p-3.5 sm:p-4 lg:p-6 bg-white border-b border-slate-200 shrink-0 space-y-3 sm:space-y-4">
         <div>
           <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Cài đặt hệ thống</h1>
@@ -56,21 +194,23 @@ export default function Setting() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-4">
-
+      <div className="p-3 sm:p-4 lg:p-6 space-y-4">
         {activeTab === 'crawler' && (
-          <div className="space-y-3 sm:space-y-4 w-full">
+          <div className="space-y-3 w-full">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs font-bold text-slate-700">Danh sách Crawler ({crawlers.length})</span>
-              <button className="h-8 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0 shadow-2xs">
+              <button 
+                onClick={() => handleOpenModal('add-crawler')}
+                className="h-8 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
+              >
                 <Plus size={14} />
                 <span className="hidden xs:inline">Thêm đối thủ</span>
               </button>
             </div>
 
-            <div className="space-y-3 w-full">
+            <div className="space-y-3">
               {crawlers.map((c) => (
-                <div key={c.id} className="w-full bg-white rounded-xl border border-slate-200 p-3 sm:p-4 shadow-2xs space-y-3">
+                <div key={c.id} className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 shadow-2xs space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
                     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                       <img src={c.logo} alt={c.name} className="w-8 h-8 rounded-lg object-contain border border-slate-200 p-0.5 bg-white shrink-0" />
@@ -84,16 +224,30 @@ export default function Setting() {
                     </div>
 
                     <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-                      <button className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-xs font-medium flex items-center gap-1 transition cursor-pointer">
+                      <button
+                        onClick={() => openCrawlPopup(c)}
+                        className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-md text-xs font-medium flex items-center gap-1 transition cursor-pointer border border-blue-200"
+                      >
                         <Play size={11} /> Cào ngay
                       </button>
-                      <button className="p-1.5 text-slate-400 hover:text-blue-600 rounded-md transition cursor-pointer">
+                      <button 
+                        onClick={() => handleOpenModal('edit-crawler', c)}
+                        className="p-1.5 text-slate-400 hover:text-blue-600 rounded-md transition cursor-pointer"
+                        title="Sửa"
+                      >
                         <Edit2 size={13} />
+                      </button>
+                      <button 
+                        onClick={() => handleOpenModal('delete-crawler', c)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 rounded-md transition cursor-pointer"
+                        title="Xóa"
+                      >
+                        <Trash2 size={13} />
                       </button>
                       <input
                         type="checkbox"
                         checked={c.enabled}
-                        onChange={() => setCrawlers(crawlers.map(item => item.id === c.id ? { ...item, enabled: !item.enabled } : item))}
+                        onChange={() => setCrawlers(crawlers.map((item) => item.id === c.id ? { ...item, enabled: !item.enabled } : item))}
                         className="w-4 h-4 text-blue-600 rounded cursor-pointer"
                       />
                     </div>
@@ -117,12 +271,14 @@ export default function Setting() {
           <div className="w-full bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
             <div className="p-3 sm:p-3.5 border-b border-slate-100 flex items-center justify-between gap-2">
               <span className="text-xs font-bold text-slate-700">Danh sách tài khoản ({users.length})</span>
-              <button className="h-8 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0 shadow-2xs">
+              <button 
+                onClick={() => handleOpenModal('add-user')}
+                className="h-8 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0 shadow-2xs"
+              >
                 <Plus size={14} />
                 <span className="hidden xs:inline">Thêm nhân viên</span>
               </button>
             </div>
-
             <div className="divide-y divide-slate-100 text-xs">
               {users.map((u) => (
                 <div key={u.id} className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-slate-50 transition">
@@ -130,19 +286,18 @@ export default function Setting() {
                     <div className="font-bold text-slate-900 truncate">{u.name}</div>
                     <div className="text-[10px] sm:text-[11px] text-slate-400 truncate mt-0.5">{u.email} • {u.department}</div>
                   </div>
-
                   <div className="flex items-center justify-between sm:justify-end gap-2.5 shrink-0">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${u.role === 'Admin' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-slate-100 text-slate-600'}`}>
                       {u.role}
                     </span>
                     <div className="flex items-center gap-1">
-                      <button title="Reset mật khẩu" className="p-1.5 text-slate-400 hover:text-orange-600 rounded cursor-pointer">
+                      <button onClick={() => handleOpenModal('reset-pass', u)} title="Reset mật khẩu" className="p-1.5 text-slate-400 hover:text-orange-600 rounded cursor-pointer">
                         <KeyRound size={14} />
                       </button>
-                      <button title="Sửa" className="p-1.5 text-slate-400 hover:text-blue-600 rounded cursor-pointer">
+                      <button onClick={() => handleOpenModal('edit-user', u)} title="Sửa" className="p-1.5 text-slate-400 hover:text-blue-600 rounded cursor-pointer">
                         <Edit2 size={14} />
                       </button>
-                      <button title="Xóa" className="p-1.5 text-slate-400 hover:text-rose-600 rounded cursor-pointer">
+                      <button onClick={() => handleOpenModal('delete-user', u)} title="Xóa" className="p-1.5 text-slate-400 hover:text-rose-600 rounded cursor-pointer">
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -156,7 +311,6 @@ export default function Setting() {
         {activeTab === 'telegram' && (
           <div className="w-full bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-2xs space-y-4 text-xs">
             <h2 className="text-sm font-bold text-slate-900">Cấu hình Bot Telegram</h2>
-
             <div className="space-y-3">
               <div className="space-y-1">
                 <label className="font-semibold text-slate-700">Bot Token:</label>
@@ -167,7 +321,6 @@ export default function Setting() {
                   className="w-full h-8.5 rounded-lg border border-slate-200 px-3 font-mono text-[11px] sm:text-xs outline-none focus:border-blue-500"
                 />
               </div>
-
               <div className="space-y-1">
                 <label className="font-semibold text-slate-700">Chat ID / Group ID:</label>
                 <input
@@ -177,35 +330,19 @@ export default function Setting() {
                   className="w-full h-8.5 rounded-lg border border-slate-200 px-3 font-mono text-[11px] sm:text-xs outline-none focus:border-blue-500"
                 />
               </div>
-
               <div className="pt-2 space-y-2 border-t border-slate-100">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={telegramConfig.notifyImmediately}
-                    onChange={(e) => setTelegramConfig({ ...telegramConfig, notifyImmediately: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0"
-                  />
+                  <input type="checkbox" checked={telegramConfig.notifyImmediately} onChange={(e) => setTelegramConfig({ ...telegramConfig, notifyImmediately: e.target.checked })} className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0" />
                   <span>Gửi tin nhắn tức thì khi cào được sự kiện mới</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={telegramConfig.includeImage}
-                    onChange={(e) => setTelegramConfig({ ...telegramConfig, includeImage: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0"
-                  />
+                  <input type="checkbox" checked={telegramConfig.includeImage} onChange={(e) => setTelegramConfig({ ...telegramConfig, includeImage: e.target.checked })} className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0" />
                   <span>Đính kèm ảnh banner vào tin nhắn</span>
                 </label>
               </div>
-
               <div className="pt-3 flex justify-end gap-2 border-t border-slate-100">
-                <button className="h-8.5 px-3.5 rounded-lg border border-slate-200 hover:bg-slate-50 font-semibold cursor-pointer">
-                  Test thử
-                </button>
-                <button className="h-8.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer shadow-2xs">
-                  Lưu
-                </button>
+                <button className="h-8.5 px-3.5 rounded-lg border border-slate-200 hover:bg-slate-50 font-semibold cursor-pointer">Test thử</button>
+                <button className="h-8.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer shadow-2xs">Lưu</button>
               </div>
             </div>
           </div>
@@ -219,7 +356,12 @@ export default function Setting() {
                 <div key={idx} className="w-full bg-white rounded-xl border border-slate-200 p-3 sm:p-3.5 shadow-2xs space-y-1.5 text-xs">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-bold text-slate-800">{rule.label} ({rule.type})</span>
-                    <button className="text-blue-600 hover:underline font-semibold cursor-pointer text-[11px] shrink-0">Sửa từ khóa</button>
+                    <button 
+                      onClick={() => handleOpenModal('edit-keyword', { ...rule, idx })}
+                      className="text-blue-600 hover:underline font-semibold cursor-pointer text-[11px] shrink-0"
+                    >
+                      Sửa từ khóa
+                    </button>
                   </div>
                   <div className="w-full p-2 sm:p-2.5 rounded bg-slate-50 border border-slate-100 font-mono text-[10px] sm:text-[11px] text-slate-600 break-words">
                     {rule.keywords}
@@ -229,8 +371,329 @@ export default function Setting() {
             </div>
           </div>
         )}
-
       </div>
+
+      {crawlTarget && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-blue-950/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="w-full max-w-[46rem] max-h-[90vh] overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-2xl flex flex-col my-auto">
+            
+            <div className="relative flex items-center justify-center px-4 py-3 bg-white border-b border-slate-100 shrink-0">
+              <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center p-1 shadow-xs border border-slate-200">
+                <img src={crawlTarget.logo} alt={crawlTarget.name} className="h-full w-full object-contain" />
+              </div>
+              <button 
+                onClick={closePopup} 
+                className="absolute right-3 shrink-0 rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {!crawlResult ? (
+                <>
+                  <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3">
+                    <div className="text-sm font-semibold text-blue-900">Bắt đầu cào dữ liệu?</div>
+                    <div className="mt-1 text-[11px] leading-5 text-blue-700/80">
+                      Hệ thống sẽ quét {crawlTarget.targetUrls.length} URL và cập nhật sự kiện mới.
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {crawlTarget.targetUrls.map((url) => (
+                        <div key={url} className="max-w-full rounded-full border border-blue-200 bg-white px-3 py-1 text-[10px] text-blue-800 truncate">
+                          {url}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {crawlLoading ? (
+                    <div className="rounded-xl border border-blue-200 bg-blue-50 p-3 space-y-2">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-blue-700">
+                        <Loader2 size={15} className="animate-spin" />
+                        <span>Đang cào dữ liệu từ nguồn...</span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-blue-100">
+                        <div className="h-full w-2/3 rounded-full bg-blue-600 animate-pulse" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-end gap-2 pt-2">
+                      <button onClick={closePopup} className="h-9 px-3.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+                        Hủy
+                      </button>
+                      <button onClick={runCrawl} className="h-9 px-4 rounded-lg bg-blue-600 text-xs font-semibold text-white hover:bg-blue-700 inline-flex items-center gap-1.5 cursor-pointer shadow-xs">
+                        <ArrowRight size={13} />
+                        Bắt đầu cào
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="space-y-5 p-2 max-h-[58vh] overflow-y-auto pr-1">
+                    {crawlResult.items.map((event) => {
+                      const style = CATEGORY_STYLES[event.type] || CATEGORY_STYLES.release;
+                      const formattedDate = formatEventDate(event.date);
+                      return (
+                        <div key={event.id} className="relative pl-4 sm:pl-5 border-l-2 border-blue-200">
+                          <span className={`absolute -left-[5px] top-1 w-2 h-2 rounded-full ring-4 ring-white ${style.dot}`} />
+
+                          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                            <span className="flex items-center gap-1 text-[10px] sm:text-[11px] text-slate-500 font-medium">
+                              <Clock size={12} className="text-blue-500" />
+                              <span>{formattedDate} {event.time ? `• ${event.time}` : ''}</span>
+                            </span>
+                            <span className={`px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-semibold leading-none ${style.pill}`}>
+                              {style.label}
+                            </span>
+                          </div>
+
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="text-xs font-bold text-slate-900 leading-snug flex-1">
+                              {event.fullTitle || event.title}
+                            </div>
+                            {event.url && (
+                              <a
+                                href={event.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-[10px] font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-0.5 shrink-0 transition"
+                              >
+                                <span>Chi tiết</span>
+                                <ExternalLink size={10} />
+                              </a>
+                            )}
+                          </div>
+
+                          {event.desc && (
+                            <div className="text-[11px] text-slate-600 mt-1.5 leading-relaxed">
+                              {event.desc}
+                            </div>
+                          )}
+
+                          {event.image && (
+                            <div
+                              onClick={() => event.url && window.open(event.url, '_blank')}
+                              title="Bấm để xem bài viết gốc"
+                              className="mt-2.5 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 shadow-2xs cursor-pointer hover:border-blue-400 hover:shadow-xs transition group"
+                            >
+                              <img
+                                src={event.image}
+                                alt={event.title}
+                                className="w-full max-h-48 object-contain rounded-lg transition duration-200 group-hover:scale-[1.01]"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex justify-end pt-2 border-t border-slate-100">
+                    <button onClick={closePopup} className="h-9 px-4 rounded-lg bg-blue-600 text-xs font-semibold text-white hover:bg-blue-700 cursor-pointer shadow-xs">
+                      Đóng
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {modalMode && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-blue-950/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="w-full max-w-lg rounded-2xl border border-blue-100 bg-white shadow-2xl flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150">
+            
+            <div className="flex items-center justify-between px-4 py-3 bg-blue-600 text-white">
+              <div className="text-xs font-bold uppercase tracking-wider">
+                {modalMode === 'add-crawler' && 'Thêm đối thủ mới'}
+                {modalMode === 'edit-crawler' && 'Chỉnh sửa Crawler'}
+                {modalMode === 'delete-crawler' && 'Xác nhận xóa đối thủ'}
+                {modalMode === 'add-user' && 'Thêm nhân viên mới'}
+                {modalMode === 'edit-user' && 'Chỉnh sửa tài khoản'}
+                {modalMode === 'delete-user' && 'Xác nhận xóa nhân viên'}
+                {modalMode === 'reset-pass' && 'Reset mật khẩu'}
+                {modalMode === 'edit-keyword' && 'Sửa từ khóa phân loại'}
+              </div>
+              <button onClick={handleCloseModal} className="p-1 text-white/80 hover:text-white rounded-lg cursor-pointer">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-3.5 text-xs">
+              {(modalMode === 'add-crawler' || modalMode === 'edit-crawler') && (
+                <>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700">Tên đối thủ:</label>
+                    <input
+                      type="text"
+                      value={formData.name || ''}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="VD: CellphoneS, FPT Shop..."
+                      className="w-full h-8.5 rounded-lg border border-slate-200 px-3 outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="font-semibold text-slate-700">Link RSS / Website theo dõi:</label>
+                      <button
+                        type="button"
+                        onClick={handleAddUrlField}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-md transition cursor-pointer"
+                      >
+                        <Plus size={13} /> Thêm đường dẫn
+                      </button>
+                    </div>
+
+                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                      {(formData.targetUrls || ['']).map((url, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={url}
+                            onChange={(e) => handleUrlChange(index, e.target.value)}
+                            placeholder="https://..."
+                            className="w-full h-8.5 rounded-lg border border-slate-200 px-3 outline-none focus:border-blue-500 font-mono text-[11px]"
+                          />
+                          {formData.targetUrls.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveUrlField(index)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 rounded-md transition cursor-pointer shrink-0"
+                              title="Xóa đường dẫn này"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {(modalMode === 'delete-crawler' || modalMode === 'delete-user') && (
+                <div className="flex items-start gap-3 py-2 text-slate-600">
+                  <div className="p-2 rounded-xl bg-rose-50 text-rose-600 shrink-0">
+                    <AlertTriangle size={20} />
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-900">Bạn có chắc chắn muốn xóa?</div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">Hành động này sẽ xóa vĩnh viễn <span className="font-semibold text-slate-800">{selectedItem?.name}</span> khỏi hệ thống.</div>
+                  </div>
+                </div>
+              )}
+
+              {(modalMode === 'add-user' || modalMode === 'edit-user') && (
+                <>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700">Họ và tên:</label>
+                    <input
+                      type="text"
+                      value={formData.name || ''}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="Nguyễn Văn A"
+                      className="w-full h-8.5 rounded-lg border border-slate-200 px-3 outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700">Email:</label>
+                    <input
+                      type="email"
+                      value={formData.email || ''}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="email@company.com"
+                      className="w-full h-8.5 rounded-lg border border-slate-200 px-3 outline-none focus:border-blue-500 font-mono text-[11px]"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700">Mật khẩu:</label>
+                    <input
+                      type="text"
+                      value={formData.password || ''}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder="Nhập mật khẩu tài khoản"
+                      className="w-full h-8.5 rounded-lg border border-slate-200 px-3 outline-none focus:border-blue-500 font-mono text-[11px]"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700">Phòng ban:</label>
+                      <select
+                        value={formData.department || 'MKT'}
+                        onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                        className="w-full h-8.5 rounded-lg border border-slate-200 px-2 outline-none bg-white"
+                      >
+                        <option value="MKT">MKT</option>
+                        <option value="Kinh doanh">Kinh doanh</option>
+                        <option value="Vận hành">Vận hành</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700">Quyền hạn:</label>
+                      <select
+                        value={formData.role || 'Staff'}
+                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                        className="w-full h-8.5 rounded-lg border border-slate-200 px-2 outline-none bg-white"
+                      >
+                        <option value="Staff">Staff</option>
+                        <option value="Admin">Admin</option>
+                      </select>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {modalMode === 'reset-pass' && (
+                <div className="space-y-2 py-1">
+                  <div className="text-slate-600">ĐẶT LẠI MẬT KHẨU CHO: <span className="font-bold text-slate-900">{selectedItem?.name}</span></div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-700">Mật khẩu mới tự động:</label>
+                    <input
+                      type="text"
+                      defaultValue="EventHub@2026"
+                      className="w-full h-8.5 rounded-lg border border-slate-200 px-3 font-mono text-slate-700 bg-slate-50"
+                      readOnly
+                    />
+                  </div>
+                </div>
+              )}
+
+              {modalMode === 'edit-keyword' && (
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700">Danh sách từ khóa (cách nhau bởi dấu phẩy):</label>
+                  <textarea
+                    rows={4}
+                    value={formData.keywords || ''}
+                    onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
+                    className="w-full rounded-lg border border-slate-200 p-2.5 outline-none font-mono text-[11px] leading-relaxed focus:border-blue-500"
+                  />
+                </div>
+              )}
+
+              <div className="pt-3 flex justify-end gap-2 border-t border-slate-100">
+                <button onClick={handleCloseModal} className="h-8.5 px-3.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer">
+                  Hủy
+                </button>
+                <button 
+                  onClick={modalMode === 'reset-pass' ? handleCloseModal : handleSaveData} 
+                  className={`h-8.5 px-4 rounded-lg text-white font-semibold cursor-pointer shadow-xs ${
+                    modalMode?.includes('delete') ? 'bg-rose-600 hover:bg-rose-700' : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
+                >
+                  {modalMode === 'reset-pass' ? 'Xác nhận' : modalMode?.includes('delete') ? 'Xóa vĩnh viễn' : 'Lưu thay đổi'}
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

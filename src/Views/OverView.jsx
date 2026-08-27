@@ -22,7 +22,7 @@ import { EVENTS_DATA } from '../Data/Data';
 const COLORS = ['#2563eb', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899'];
 
 export default function Overview() {
-  const [date, setDate] = useState(new Date(2026, 7, 26));
+  const [date, setDate] = useState(new Date());
 
   const { competitors, totalEvents, totalUrls, slots, brandStats, calendar, eventDays } = useMemo(() => {
     const list = EVENTS_DATA.filter((b) => b.id !== 'minhtuan');

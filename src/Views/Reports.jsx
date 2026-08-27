@@ -109,7 +109,7 @@ export default function Reports() {
           </div>
 
           <div className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">4h</div>
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">6h</div>
             <div>
               <div className="text-[11px] text-slate-400 font-medium">Tần suất</div>
               <div className="text-lg font-bold text-slate-900">4 lần/ngày</div>

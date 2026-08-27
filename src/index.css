@@ -34,6 +34,8 @@ body,
   margin: 0;
   padding: 0;
   background-color: #f8fafc;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .rdp-root {
