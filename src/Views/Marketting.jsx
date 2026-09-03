@@ -3,23 +3,26 @@ import { Search, Plus } from 'lucide-react';
 import Calendar from '../Components/Calendar';
 import EventCard from '../Components/EventCard';
 import EventDetail from '../Components/EventDetail';
-import { COMPETITORS_DATA } from '../Data/Data';
+import AddEventModal from '../Components/AddEventModal';
+import { useEventsByDate } from '../API/useEventsByDate';
 
 export default function Marketting() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCompetitor, setSelectedCompetitor] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const dateStr = selectedDate.toLocaleDateString('en-CA');
+  const { sources, refetch } = useEventsByDate(dateStr);
 
   const displayCompetitors = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
 
-    return COMPETITORS_DATA.map((comp) => {
+    return sources.map((comp) => {
       const events = (comp.events || []).filter(
         (ev) =>
           ev.date === dateStr &&
-          ev.type === 'ads' &&
+          ['ads', 'release', 'promo'].includes(ev.type) &&
           (q === '' || comp.name.toLowerCase().includes(q) || ev.title.toLowerCase().includes(q))
       );
 
@@ -29,7 +32,7 @@ export default function Marketting() {
         totalEvents: events.length,
       };
     }).filter((comp) => comp.totalEvents > 0);
-  }, [dateStr, searchQuery]);
+  }, [dateStr, searchQuery, sources]);
 
   return (
     <div className="flex h-full min-h-0 w-full overflow-hidden bg-slate-50 text-slate-800 font-sans">
@@ -51,7 +54,10 @@ export default function Marketting() {
                 className="h-9 w-full sm:w-60 lg:w-72 rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs outline-none focus:border-blue-500 shadow-2xs"
               />
             </div>
-            <button className="h-9 px-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer shrink-0">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="h-9 px-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer shrink-0"
+            >
               <Plus size={15} />
               <span>Thêm sự kiện</span>
             </button>
@@ -61,7 +67,7 @@ export default function Marketting() {
         <Calendar
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
-          allowedTypes={['ads']}
+          allowedTypes={['ads', 'release', 'promo']}
         />
 
         <div className="rounded-xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
@@ -104,6 +110,14 @@ export default function Marketting() {
         <EventDetail
           data={selectedCompetitor}
           onClose={() => setSelectedCompetitor(null)}
+        />
+      )}
+
+      {showAddModal && (
+        <AddEventModal
+          onClose={() => setShowAddModal(false)}
+          onSuccess={() => refetch?.()}
+          defaultType="ads"
         />
       )}
     </div>

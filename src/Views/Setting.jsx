@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Bot,
@@ -11,61 +11,134 @@ import {
   KeyRound,
   Play,
   Clock,
-  CheckCircle2,
   X,
   Loader2,
   ArrowRight,
   ExternalLink,
   AlertTriangle,
 } from 'lucide-react';
-import { EVENTS_DATA, INITIAL_USERS, INITIAL_TELEGRAM_CONFIG, KEYWORD_RULES, CATEGORY_STYLES } from '../Data/Data';
+import { CATEGORY_STYLES } from '../constants/eventStyles';
+import { settingsApi, usersApi } from '../API/API';
+import { useEventHubData } from '../API/useEventHubData';
+import { getBrandLogo } from '../constants/brandLogos';
+
+const EMPTY_TELEGRAM_CONFIG = { botToken: '', chatId: '', notifyImmediately: false, includeImage: false };
 
 export default function Setting() {
   const [activeTab, setActiveTab] = useState('crawler');
   const [crawlTarget, setCrawlTarget] = useState(null);
   const [crawlLoading, setCrawlLoading] = useState(false);
   const [crawlResult, setCrawlResult] = useState(null);
-
-  const [crawlers, setCrawlers] = useState(
-    EVENTS_DATA.filter((item) => item.id !== 'minhtuan').map((comp) => ({
-      id: comp.id,
-      name: comp.name,
-      logo: comp.logo,
-      enabled: true,
-      interval: '6h',
-      lastRun: '13:45 - 25/08/2026',
-      targetUrls: comp.targetUrls || [],
-      events: comp.events || [],
-    }))
-  );
-
-  const [users, setUsers] = useState(INITIAL_USERS);
-  const [telegramConfig, setTelegramConfig] = useState(INITIAL_TELEGRAM_CONFIG);
-  const [keywordRules, setKeywordRules] = useState(KEYWORD_RULES);
+  const { data: eventHubData } = useEventHubData();
+  const [crawlers, setCrawlers] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [telegramConfig, setTelegramConfig] = useState(EMPTY_TELEGRAM_CONFIG);
+  const [keywordRules, setKeywordRules] = useState([]);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
 
   const [modalMode, setModalMode] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    setCrawlers(
+      eventHubData
+        .filter((item) => item.id !== 'minhtuan')
+        .map((comp) => ({
+          id: comp.id,
+          name: comp.name,
+          logo: comp.logo,
+          enabled: true,
+          interval: '6h',
+          lastRun: 'Chua co du lieu',
+          targetUrls: comp.targetUrls || [],
+          events: comp.events || [],
+        }))
+    );
+  }, [eventHubData]);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      setUsersLoading(true);
+      try {
+        const [settingsRes, usersRes] = await Promise.all([
+          settingsApi.getAll(),
+          usersApi.list().catch(() => ({ data: [] })),
+        ]);
+
+        if (!active) return;
+
+        const settings = settingsRes.data || {};
+        if (settings.telegram_config) setTelegramConfig({ ...EMPTY_TELEGRAM_CONFIG, ...settings.telegram_config });
+        if (settings.keyword_rules) setKeywordRules(settings.keyword_rules);
+        if (settings.crawler_sources) {
+          setCrawlers(
+            settings.crawler_sources.map((item) => ({
+              ...item,
+              events: eventHubData.find((brand) => brand.id === item.id)?.events || [],
+              lastRun: item.lastRun || 'Chua co du lieu',
+            }))
+          );
+        }
+
+        const list = Array.isArray(usersRes.data) ? usersRes.data : [];
+        setUsers(
+          list.map((user) => ({
+            id: user.id,
+            name: user.email,
+            email: user.email,
+            department: user.department || 'MKT',
+            role: user.role === 'admin' ? 'Admin' : 'Staff',
+            status: user.isActive ? 'active' : 'inactive',
+          }))
+        );
+      } catch (err) {
+        setStatusMessage(err.response?.data?.message || 'Khong tai duoc cau hinh.');
+      } finally {
+        if (active) setUsersLoading(false);
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, [eventHubData]);
 
   const openCrawlPopup = (crawler) => {
     setCrawlTarget(crawler);
     setCrawlResult(null);
   };
 
-  const runCrawl = () => {
+  const runCrawl = async () => {
     if (!crawlTarget) return;
     setCrawlLoading(true);
-    window.setTimeout(() => {
+    try {
+      const response = await settingsApi.runCrawlerById(crawlTarget.id);
+      const items = Array.isArray(response.data)
+        ? response.data
+        : response.data?.items || response.data?.events || [];
+      setCrawlResult({ items });
+      setStatusMessage(`Đã chạy crawler ${crawlTarget.name}.`);
+    } catch (err) {
+      setStatusMessage(err.response?.data?.message || 'Chạy crawler thất bại.');
+    } finally {
       setCrawlLoading(false);
-      
-      const sortedEvents = [...(crawlTarget.events || [])].sort((a, b) => {
-        const dateTimeA = new Date(`${a.date || '1970-01-01'}T${a.time || '00:00'}`);
-        const dateTimeB = new Date(`${b.date || '1970-01-01'}T${b.time || '00:00'}`);
-        return dateTimeA - dateTimeB;
-      });
+    }
+  };
 
-      setCrawlResult({ items: sortedEvents });
-    }, 1200);
+  const handleRunAllCrawlers = async () => {
+    setCrawlLoading(true);
+    try {
+      await settingsApi.runAllCrawlers();
+      setStatusMessage('Đã kích hoạt cào dữ liệu cho tất cả các đối thủ!');
+    } catch (err) {
+      setStatusMessage(err.response?.data?.message || 'Cào tất cả thất bại.');
+    } finally {
+      setCrawlLoading(false);
+    }
   };
 
   const closePopup = () => {
@@ -119,45 +192,146 @@ export default function Setting() {
     setFormData({ ...formData, targetUrls: urls.length ? urls : [''] });
   };
 
-  const handleSaveData = () => {
-    if (modalMode === 'add-crawler') {
-      const newCrawler = {
-        id: Date.now().toString(),
-        name: formData.name || 'Đối thủ mới',
-        logo: formData.logo || '/img/mtm.jpg',
-        enabled: true,
-        interval: formData.interval || '6h',
-        lastRun: 'Chưa chạy',
-        targetUrls: formData.targetUrls?.filter((u) => u.trim() !== '') || [],
-        events: [],
-      };
-      setCrawlers([...crawlers, newCrawler]);
-    } else if (modalMode === 'edit-crawler') {
-      const updatedCrawler = {
-        ...formData,
-        targetUrls: formData.targetUrls?.filter((u) => u.trim() !== '') || [],
-      };
-      setCrawlers(crawlers.map(c => c.id === selectedItem.id ? { ...c, ...updatedCrawler } : c));
-    } else if (modalMode === 'delete-crawler') {
-      setCrawlers(crawlers.filter(c => c.id !== selectedItem.id));
-    } else if (modalMode === 'add-user') {
-      const newUser = {
-        id: Date.now().toString(),
-        name: formData.name || 'Nhân viên mới',
-        email: formData.email || 'staff@company.com',
-        password: formData.password || 'EventHub@2026',
-        department: formData.department || 'MKT',
-        role: formData.role || 'Staff',
-      };
-      setUsers([...users, newUser]);
-    } else if (modalMode === 'edit-user') {
-      setUsers(users.map(u => u.id === selectedItem.id ? { ...u, ...formData } : u));
-    } else if (modalMode === 'delete-user') {
-      setUsers(users.filter(u => u.id !== selectedItem.id));
-    } else if (modalMode === 'edit-keyword') {
-      setKeywordRules(keywordRules.map((k, idx) => idx === selectedItem.idx ? { ...k, keywords: formData.keywords } : k));
+  const reloadUsers = async () => {
+    setUsersLoading(true);
+    try {
+      const res = await usersApi.list();
+      const list = Array.isArray(res.data) ? res.data : [];
+      setUsers(
+        list.map((u) => ({
+          id: u.id,
+          name: u.email,
+          email: u.email,
+          department: u.department || 'MKT',
+          role: u.role === 'admin' ? 'Admin' : 'Staff',
+          status: u.isActive ? 'active' : 'inactive',
+        }))
+      );
+    } catch {
+      // ignore user load error
+    } finally {
+      setUsersLoading(false);
     }
-    handleCloseModal();
+  };
+
+  const handleSaveCrawlersList = async (updatedCrawlers) => {
+    setCrawlers(updatedCrawlers);
+    setSettingsSaving(true);
+    try {
+      const cleanTargets = updatedCrawlers.map((c) => ({
+        id: c.id,
+        name: c.name,
+        logo: c.logo || null,
+        enabled: c.enabled,
+        interval: c.interval || '6h',
+        targetUrls: c.targetUrls || [],
+      }));
+      await settingsApi.saveCrawlers({ targets: cleanTargets });
+      setStatusMessage('Đã lưu cấu hình Crawler thành công.');
+    } catch (err) {
+      setStatusMessage(err.response?.data?.message || 'Lưu cấu hình Crawler thất bại.');
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
+
+  const handleToggleCrawler = (crawlerId) => {
+    const updated = crawlers.map((item) =>
+      item.id === crawlerId ? { ...item, enabled: !item.enabled } : item
+    );
+    handleSaveCrawlersList(updated);
+  };
+
+  const handleSaveTelegramConfig = async () => {
+    setSettingsSaving(true);
+    try {
+      await settingsApi.saveTelegram(telegramConfig);
+      setStatusMessage('Đã lưu cấu hình Telegram thành công.');
+    } catch (err) {
+      setStatusMessage(err.response?.data?.message || 'Lưu cấu hình Telegram thất bại.');
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
+
+  const handleTestTelegramConfig = async () => {
+    setSettingsSaving(true);
+    try {
+      await settingsApi.testTelegram(telegramConfig);
+      setStatusMessage('Đã gửi tin nhắn thử nghiệm Telegram.');
+    } catch (err) {
+      setStatusMessage(err.response?.data?.message || 'Kiểm tra Telegram thất bại.');
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
+
+  const handleSaveData = async () => {
+    setSettingsSaving(true);
+    try {
+      if (modalMode === 'add-crawler') {
+        const newId = (formData.name || 'crawler').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const newCrawler = {
+          id: newId || Date.now().toString(),
+          name: formData.name || 'Đối thủ mới',
+          logo: formData.logo || '/img/mtm.jpg',
+          enabled: true,
+          interval: formData.interval || '6h',
+          lastRun: 'Chưa chạy',
+          targetUrls: formData.targetUrls?.filter((u) => u.trim() !== '') || [],
+          events: [],
+        };
+        const updated = [...crawlers, newCrawler];
+        await handleSaveCrawlersList(updated);
+      } else if (modalMode === 'edit-crawler') {
+        const updatedCrawler = {
+          ...formData,
+          targetUrls: formData.targetUrls?.filter((u) => u.trim() !== '') || [],
+        };
+        const updated = crawlers.map((c) => (c.id === selectedItem.id ? { ...c, ...updatedCrawler } : c));
+        await handleSaveCrawlersList(updated);
+      } else if (modalMode === 'delete-crawler') {
+        const updated = crawlers.filter((c) => c.id !== selectedItem.id);
+        await handleSaveCrawlersList(updated);
+      } else if (modalMode === 'add-user') {
+        await usersApi.create({
+          email: formData.email,
+          password: formData.password || 'EventHub@2026',
+          role: (formData.role || 'Staff').toLowerCase(),
+          department: formData.department || 'MKT',
+        });
+        await reloadUsers();
+        setStatusMessage(`Đã thêm nhân viên ${formData.email}.`);
+      } else if (modalMode === 'edit-user') {
+        await usersApi.update(selectedItem.id, {
+          email: formData.email,
+          password: formData.password && !formData.password.includes('•') ? formData.password : undefined,
+          role: (formData.role || 'Staff').toLowerCase(),
+          department: formData.department || 'MKT',
+        });
+        await reloadUsers();
+        setStatusMessage(`Đã cập nhật nhân viên ${formData.email}.`);
+      } else if (modalMode === 'delete-user') {
+        await usersApi.remove(selectedItem.id);
+        await reloadUsers();
+        setStatusMessage(`Đã xóa tài khoản nhân viên.`);
+      } else if (modalMode === 'reset-pass') {
+        await usersApi.resetPassword(selectedItem.id);
+        setStatusMessage(`Đã đặt lại mật khẩu cho ${selectedItem.email} thành EventHub@2026.`);
+      } else if (modalMode === 'edit-keyword') {
+        const updatedRules = keywordRules.map((k, idx) =>
+          idx === selectedItem.idx ? { ...k, keywords: formData.keywords } : k
+        );
+        setKeywordRules(updatedRules);
+        await settingsApi.saveKeywords({ rules: updatedRules });
+        setStatusMessage('Đã lưu từ khóa phân loại.');
+      }
+    } catch (err) {
+      setStatusMessage(err.response?.data?.message || 'Thao tác thất bại.');
+    } finally {
+      setSettingsSaving(false);
+      handleCloseModal();
+    }
   };
 
   return (
@@ -199,13 +373,33 @@ export default function Setting() {
           <div className="space-y-3 w-full">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs font-bold text-slate-700">Danh sách Crawler ({crawlers.length})</span>
-              <button 
-                onClick={() => handleOpenModal('add-crawler')}
-                className="h-8 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
-              >
-                <Plus size={14} />
-                <span className="hidden xs:inline">Thêm đối thủ</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleRunAllCrawlers}
+                  disabled={crawlLoading}
+                  className="h-8 px-3 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-2xs disabled:opacity-50"
+                  title="Cào ngay toàn bộ các trang đối thủ"
+                >
+                  {crawlLoading ? (
+                    <>
+                      <Loader2 size={13} className="animate-spin text-blue-600" />
+                      <span>Đang cào tất cả...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play size={12} className="text-blue-600 fill-blue-600" />
+                      <span>Cào tất cả</span>
+                    </>
+                  )}
+                </button>
+                <button 
+                  onClick={() => handleOpenModal('add-crawler')}
+                  className="h-8 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
+                >
+                  <Plus size={14} />
+                  <span className="hidden xs:inline">Thêm đối thủ</span>
+                </button>
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -213,7 +407,12 @@ export default function Setting() {
                 <div key={c.id} className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 shadow-2xs space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
                     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                      <img src={c.logo} alt={c.name} className="w-8 h-8 rounded-lg object-contain border border-slate-200 p-0.5 bg-white shrink-0" />
+                      <img
+                        src={getBrandLogo(c.id, c.name, c.logo)}
+                        alt={c.name}
+                        onError={(e) => { e.currentTarget.src = getBrandLogo(c.id, c.name); }}
+                        className="w-8 h-8 rounded-lg object-contain border border-slate-200 p-0.5 bg-white shrink-0"
+                      />
                       <div className="min-w-0">
                         <div className="text-xs font-bold text-slate-900 truncate">{c.name}</div>
                         <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5 truncate">
@@ -247,7 +446,7 @@ export default function Setting() {
                       <input
                         type="checkbox"
                         checked={c.enabled}
-                        onChange={() => setCrawlers(crawlers.map((item) => item.id === c.id ? { ...item, enabled: !item.enabled } : item))}
+                        onChange={() => handleToggleCrawler(c.id)}
                         className="w-4 h-4 text-blue-600 rounded cursor-pointer"
                       />
                     </div>
@@ -341,8 +540,20 @@ export default function Setting() {
                 </label>
               </div>
               <div className="pt-3 flex justify-end gap-2 border-t border-slate-100">
-                <button className="h-8.5 px-3.5 rounded-lg border border-slate-200 hover:bg-slate-50 font-semibold cursor-pointer">Test thử</button>
-                <button className="h-8.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer shadow-2xs">Lưu</button>
+                <button
+                  onClick={handleTestTelegramConfig}
+                  disabled={settingsSaving}
+                  className="h-8.5 px-3.5 rounded-lg border border-slate-200 hover:bg-slate-50 font-semibold cursor-pointer disabled:opacity-50"
+                >
+                  Test thử
+                </button>
+                <button
+                  onClick={handleSaveTelegramConfig}
+                  disabled={settingsSaving}
+                  className="h-8.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer shadow-2xs disabled:opacity-50"
+                >
+                  {settingsSaving ? 'Đang lưu...' : 'Lưu'}
+                </button>
               </div>
             </div>
           </div>

@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { X, Clock, FileEdit, ExternalLink } from 'lucide-react';
-import { CATEGORY_STYLES } from '../Data/Data';
+import { CATEGORY_STYLES } from '../constants/eventStyles';
+import { getBrandLogo } from '../constants/brandLogos';
 
 export default function EventDetail({ data, onClose }) {
   const [activeTab, setActiveTab] = useState('events');
 
   if (!data) return null;
+
+  const logoUrl = getBrandLogo(data?.id, data?.name, data?.logo);
 
   const getFormattedDate = () => {
     const dateStr = data.events?.[0]?.date;
@@ -44,8 +47,9 @@ export default function EventDetail({ data, onClose }) {
 
           <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 border-b border-slate-100 flex items-center gap-3">
             <img
-              src={data.logo}
+              src={logoUrl}
               alt={data.name}
+              onError={(e) => { e.currentTarget.src = getBrandLogo(data?.id, data?.name); }}
               className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg object-contain border border-slate-200 shrink-0 shadow-2xs p-0.5 bg-white"
             />
             <div className="min-w-0">

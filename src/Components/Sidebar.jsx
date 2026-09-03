@@ -14,7 +14,8 @@ import {
   Check,
   X,
 } from 'lucide-react';
-import { COMPETITORS_DATA } from '../Data/Data';
+import { useEventHubData } from '../API/useEventHubData';
+import { getBrandLogo } from '../constants/brandLogos';
 
 const MENU_ITEMS = [
   { id: 'overview', label: 'Tổng quan', icon: Home },
@@ -38,6 +39,7 @@ const QUICK_FILTERS = [
 ];
 
 export default function Sidebar({ currentView = 'overview', onNavigate, isOpen, onClose }) {
+  const { data: sources } = useEventHubData();
   const [checkedFilters, setCheckedFilters] = React.useState({
     all: true,
     mkt: true,
@@ -140,14 +142,15 @@ export default function Sidebar({ currentView = 'overview', onNavigate, isOpen, 
               Đối thủ nổi bật
             </div>
             <div className="space-y-1">
-              {COMPETITORS_DATA.map((item) => (
+              {sources.map((item) => (
                 <div
                   key={item.id}
                   className="flex items-center gap-2.5 px-1 py-1 rounded-md hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700 transition"
                 >
                   <img
-                    src={item.logo}
+                    src={getBrandLogo(item.id, item.name, item.logo)}
                     alt={item.name}
+                    onError={(e) => { e.currentTarget.src = getBrandLogo(item.id, item.name); }}
                     className="w-4 h-4 rounded object-contain border border-slate-100 bg-white"
                   />
                   <span className="truncate">{item.name}</span>

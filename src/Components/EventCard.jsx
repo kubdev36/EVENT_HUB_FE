@@ -1,8 +1,11 @@
 import React from 'react';
 import { Clock, ChevronRight } from 'lucide-react';
-import { CATEGORY_STYLES } from '../Data/Data';
+import { CATEGORY_STYLES } from '../constants/eventStyles';
+import { getBrandLogo } from '../constants/brandLogos';
 
 export default function EventCard({ data, onOpenDetail }) {
+  const logoUrl = getBrandLogo(data?.id, data?.name, data?.logo);
+
   return (
     <div className="flex flex-col md:grid md:grid-cols-[160px_1fr_150px] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs hover:border-slate-300 transition-all">
       <div 
@@ -11,8 +14,11 @@ export default function EventCard({ data, onOpenDetail }) {
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <img
-            src={data.logo}
+            src={logoUrl}
             alt={data.name}
+            onError={(e) => {
+              e.currentTarget.src = getBrandLogo(data?.id, data?.name);
+            }}
             className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg object-contain border border-slate-200 p-0.5 bg-white shrink-0 shadow-xs"
           />
           <div className="min-w-0">
@@ -69,13 +75,27 @@ export default function EventCard({ data, onOpenDetail }) {
                   </div>
                 </div>
 
-                <div className="h-24 sm:h-20 w-full rounded-md overflow-hidden bg-slate-100 border border-slate-100 shrink-0 select-none">
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
+                <div className="h-24 sm:h-20 w-full rounded-md overflow-hidden bg-slate-50 border border-slate-100 shrink-0 select-none flex items-center justify-center">
+                  {event.image ? (
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = logoUrl;
+                        e.currentTarget.className = "w-9 h-9 object-contain opacity-60 p-0.5 bg-white rounded";
+                      }}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <img
+                      src={logoUrl}
+                      alt={data.name}
+                      className="w-9 h-9 object-contain opacity-50 p-0.5 bg-white rounded"
+                    />
+                  )}
                 </div>
               </div>
             );

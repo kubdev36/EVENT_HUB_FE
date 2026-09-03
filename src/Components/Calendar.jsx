@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { EVENTS_DATA } from '../Data/Data';
+import { useEventsByDate } from '../API/useEventsByDate';
 
 const DAYS_OF_WEEK = ['Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7', 'CN'];
 
@@ -29,12 +29,14 @@ export default function Calendar({
   excludeCompetitorId = null,
 }) {
   const [viewDate, setViewDate] = useState(selectedDate || new Date());
+  const monthKey = `${viewDate.getFullYear()}-${String(viewDate.getMonth() + 1).padStart(2, '0')}`;
+  const { sources } = useEventsByDate();
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
 
   const filteredEvents = useMemo(() => {
-    return EVENTS_DATA
+    return sources
       .filter((comp) => {
         if (competitorId) return comp.id === competitorId;
         if (excludeCompetitorId) return comp.id !== excludeCompetitorId;
@@ -43,9 +45,9 @@ export default function Calendar({
       .flatMap((comp) => comp.events || [])
       .filter((ev) => {
         if (!allowedTypes || allowedTypes.length === 0) return true;
-        return allowedTypes.includes(ev.type);
+        return allowedTypes.includes(ev.type) && String(ev.date || '').startsWith(monthKey);
       });
-  }, [allowedTypes, competitorId, excludeCompetitorId]);
+  }, [allowedTypes, competitorId, excludeCompetitorId, sources, monthKey]);
 
   const eventsByDate = useMemo(() => {
     const map = {};

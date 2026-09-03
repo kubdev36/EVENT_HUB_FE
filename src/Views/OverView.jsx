@@ -13,19 +13,18 @@ import {
   Cell,
   CartesianGrid,
 } from 'recharts';
-import {
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
-import { EVENTS_DATA } from '../Data/Data';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getBrandLogo } from '../constants/brandLogos';
+import { useEventHubData } from '../API/useEventHubData';
 
 const COLORS = ['#2563eb', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899'];
 
 export default function Overview() {
   const [date, setDate] = useState(new Date());
+  const { data: eventHubData } = useEventHubData();
 
   const { competitors, totalEvents, totalUrls, slots, brandStats, calendar, eventDays } = useMemo(() => {
-    const list = EVENTS_DATA.filter((b) => b.id !== 'minhtuan');
+    const list = eventHubData.filter((b) => b.id !== 'minhtuan');
     const timeSlots = { '00:00': 0, '06:00': 0, '12:00': 0, '18:00': 0 };
     let events = 0;
     let urls = 0;
@@ -52,7 +51,12 @@ export default function Overview() {
       totalEvents: events,
       totalUrls: urls,
       slots: Object.keys(timeSlots).map((time) => ({ time, events: timeSlots[time] })),
-      brandStats: list.map((b) => ({ id: b.id, name: b.name, logo: b.logo, events: (b.events || []).length })),
+      brandStats: list.map((b) => ({
+        id: b.id,
+        name: b.name,
+        logo: getBrandLogo(b.id, b.name, b.logo),
+        events: (b.events || []).length,
+      })),
       calendar: {
         blanks: Array.from({ length: new Date(y, m, 1).getDay() }, (_, i) => i),
         days: Array.from({ length: new Date(y, m + 1, 0).getDate() }, (_, i) => i + 1),
@@ -61,7 +65,7 @@ export default function Overview() {
       },
       eventDays: daysWithEvents,
     };
-  }, [date]);
+  }, [date, eventHubData]);
 
   return (
     <div className="w-full min-h-full bg-[#f4f7fc] text-slate-800 font-sans p-4 sm:p-5 lg:p-6 flex flex-col xl:flex-row gap-5 pb-12">
@@ -202,10 +206,11 @@ export default function Overview() {
                   tickLine={false}
                   tick={({ x, y, payload }) => {
                     const brand = brandStats.find((b) => b.name === payload.value);
+                    const logoSrc = getBrandLogo(brand?.id, brand?.name, brand?.logo);
                     return (
                       <g transform={`translate(${x},${y})`}>
-                        {brand?.logo && (
-                          <image x={-10} y={6} width={20} height={20} href={brand.logo} preserveAspectRatio="xMidYMid meet" />
+                        {logoSrc && (
+                          <image x={-10} y={6} width={20} height={20} href={logoSrc} preserveAspectRatio="xMidYMid meet" />
                         )}
                         <text x={0} y={36} textAnchor="middle" fill="#475569" fontSize={10} fontWeight={600}>
                           {payload.value}
@@ -265,7 +270,12 @@ export default function Overview() {
               <div key={b.id} className="p-2.5 rounded-xl border border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-7 h-7 border border-slate-200 rounded-lg flex items-center justify-center bg-white p-0.5 shrink-0">
-                    {b.logo ? <img src={b.logo} alt="" className="w-full h-full object-contain rounded" /> : <span className="text-xs">{b.name[0]}</span>}
+                    <img
+                      src={getBrandLogo(b.id, b.name, b.logo)}
+                      alt={b.name}
+                      onError={(e) => { e.currentTarget.src = getBrandLogo(b.id, b.name); }}
+                      className="w-full h-full object-contain rounded"
+                    />
                   </div>
                   <div className="min-w-0">
                     <div className="text-xs font-semibold truncate">{b.name}</div>

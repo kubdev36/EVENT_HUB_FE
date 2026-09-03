@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  Search, 
+import {
+  Search,
   ChevronLeft, 
   ChevronRight, 
   X, 
@@ -10,7 +10,9 @@ import {
   Calendar,
   Clock
 } from 'lucide-react';
-import { EVENTS_DATA, CATEGORY_STYLES } from '../Data/Data';
+import { useEventHubData } from '../API/useEventHubData';
+import { CATEGORY_STYLES } from '../constants/eventStyles';
+import { getBrandLogo } from '../constants/brandLogos';
 
 export default function MediaLibrary() {
   const [selectedSegment, setSelectedSegment] = useState('all');
@@ -18,9 +20,10 @@ export default function MediaLibrary() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(null);
   const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const { data: eventHubData } = useEventHubData();
 
   const allPhotos = useMemo(() => {
-    return EVENTS_DATA.flatMap((brand) =>
+    return eventHubData.flatMap((brand) =>
       (brand.events || [])
         .filter((e) => e.image)
         .map((e) => ({
@@ -34,10 +37,10 @@ export default function MediaLibrary() {
           url: e.url,
           brandId: brand.id,
           brandName: brand.name,
-          brandLogo: brand.logo,
+          brandLogo: getBrandLogo(brand.id, brand.name, brand.logo),
         }))
     );
-  }, []);
+  }, [eventHubData]);
 
   const filteredPhotos = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();

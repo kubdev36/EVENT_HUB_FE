@@ -3,19 +3,22 @@ import { Search, Plus } from 'lucide-react';
 import Calendar from '../Components/Calendar';
 import EventCard from '../Components/EventCard';
 import EventDetail from '../Components/EventDetail';
-import { EVENTS_DATA } from '../Data/Data';
+import AddEventModal from '../Components/AddEventModal';
+import { useEventHubData } from '../API/useEventHubData';
 
 export default function Daily() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCompetitor, setSelectedCompetitor] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const { data: eventHubData, refetch } = useEventHubData();
 
-  const dateStr = selectedDate.toLocaleDateString('en-CA');
+  const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
 
   const displayCompetitors = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
 
-    return EVENTS_DATA.map((comp) => {
+    return eventHubData.map((comp) => {
       const events = (comp.events || [])
         .filter(
           (ev) =>
@@ -30,7 +33,7 @@ export default function Daily() {
         totalEvents: events.length,
       };
     }).filter((comp) => comp.totalEvents > 0);
-  }, [dateStr, searchQuery]);
+  }, [dateStr, searchQuery, eventHubData]);
 
   return (
     <div className="flex h-full min-h-0 w-full overflow-hidden bg-slate-50 text-slate-800 font-sans">
@@ -56,7 +59,10 @@ export default function Daily() {
               />
             </div>
             
-            <button className="h-9 px-3 sm:px-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer shrink-0">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="h-9 px-3 sm:px-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer shrink-0"
+            >
               <Plus size={15} />
               <span className="hidden xs:inline">Thêm sự kiện</span>
             </button>
@@ -109,6 +115,13 @@ export default function Daily() {
         <EventDetail
           data={selectedCompetitor}
           onClose={() => setSelectedCompetitor(null)}
+        />
+      )}
+
+      {showAddModal && (
+        <AddEventModal
+          onClose={() => setShowAddModal(false)}
+          onSuccess={() => refetch?.()}
         />
       )}
     </div>

@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { ChevronLeft, ChevronRight, ChevronDown, X, ExternalLink, Calendar as CalendarIcon, Clock } from 'lucide-react';
-import { COMPETITORS_DATA, CATEGORY_STYLES } from '../Data/Data';
+import { CATEGORY_STYLES } from '../constants/eventStyles';
+import { useEventsByDate } from '../API/useEventsByDate';
 
 const DAYS_OF_WEEK = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 const MAX_SHOW_EVENTS = 2;
@@ -11,19 +12,20 @@ export default function Month() {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 7, 1));
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedDayEvents, setSelectedDayEvents] = useState(null);
+  const { sources } = useEventsByDate();
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
   const events = useMemo(() => {
-    return COMPETITORS_DATA.flatMap((c) =>
+    return sources.flatMap((c) =>
       (c.events || []).map((e) => ({
         ...e,
         brand: c.name,
         logo: c.logo,
       }))
     ).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-  }, []);
+  }, [sources]);
 
   const calendarDays = useMemo(() => {
     const firstDayIndex = new Date(year, month, 1).getDay();

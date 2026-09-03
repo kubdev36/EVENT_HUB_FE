@@ -23,18 +23,21 @@ import {
   Clock,
   ExternalLink,
 } from 'lucide-react';
-import { EVENTS_DATA, CATEGORY_STYLES } from '../Data/Data';
+import { useEventHubData } from '../API/useEventHubData';
+import { CATEGORY_STYLES } from '../constants/eventStyles';
+import { getBrandLogo } from '../constants/brandLogos';
 
 export default function Reports() {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const { data: eventHubData } = useEventHubData();
 
   const { competitors, totalEvents, timelineData, brandChartData, calendarGrid, dailyEvents, eventDaysSet } = useMemo(() => {
-    const list = EVENTS_DATA.filter((b) => b.id !== 'minhtuan');
+    const list = eventHubData.filter((b) => b.id !== 'minhtuan');
     const allEvents = [];
     const dateCounts = {};
     const eventDays = new Set();
 
-    EVENTS_DATA.forEach((b) => {
+    eventHubData.forEach((b) => {
       (b.events || []).forEach((e) => {
         allEvents.push({ ...e, brandName: b.name, logo: b.logo });
         if (e.date) {
@@ -66,7 +69,42 @@ export default function Reports() {
       dailyEvents: allEvents.filter((item) => item.date === dateStr),
       eventDaysSet: eventDays,
     };
-  }, [currentDate]);
+  }, [currentDate, eventHubData]);
+
+  const handleExportExcel = () => {
+    const allEvents = eventHubData.flatMap((b) =>
+      (b.events || []).map((e) => ({
+        'Thương hiệu': b.name,
+        'Tiêu đề': e.title,
+        'Phân loại': e.type,
+        'Ngày': e.date,
+        'Giờ': e.time,
+        'Đường dẫn': e.url || '',
+      }))
+    );
+
+    if (allEvents.length === 0) {
+      alert('Chưa có dữ liệu sự kiện để xuất báo cáo.');
+      return;
+    }
+
+    const headers = Object.keys(allEvents[0]).join(',');
+    const rows = allEvents.map((row) =>
+      Object.values(row)
+        .map((val) => `"${String(val).replace(/"/g, '""')}"`)
+        .join(',')
+    );
+
+    const csvContent = '\uFEFF' + [headers, ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Bao_Cao_Su_Kien_EventHub_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="w-full min-h-full bg-[#f4f7fc] text-slate-800 font-sans p-4 sm:p-5 lg:p-6 flex flex-col xl:flex-row gap-5">
@@ -79,14 +117,22 @@ export default function Reports() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <button type="button" className="px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              className="px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs transition"
+            >
               <FileSpreadsheet size={14} className="text-emerald-600" />
-              <span>Excel</span>
+              <span>Xuất Excel</span>
             </button>
 
-            <button type="button" className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs transition"
+            >
               <FileText size={14} />
-              <span>PDF</span>
+              <span>Xuất CSV</span>
             </button>
           </div>
         </div>
@@ -272,7 +318,12 @@ export default function Reports() {
               <div key={brand.id} className="p-2.5 rounded-xl border border-slate-100 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-7 h-7 bg-white border border-slate-200/80 p-0.5 flex items-center justify-center shrink-0 rounded-lg">
-                    {brand.logo ? <img src={brand.logo} alt="" className="w-full h-full object-contain" /> : <span>{brand.name[0]}</span>}
+                    <img
+                      src={getBrandLogo(brand.id, brand.name, brand.logo)}
+                      alt={brand.name}
+                      onError={(e) => { e.currentTarget.src = getBrandLogo(brand.id, brand.name); }}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                   <div className="min-w-0">
                     <div className="text-xs font-semibold text-slate-800 truncate">{brand.name}</div>

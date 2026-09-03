@@ -14,6 +14,7 @@ import Reports from './Views/Reports';
 import Setting from './Views/Setting';
 
 const AUTH_KEY = 'event-hub-auth';
+const USER_KEY = 'user';
 const VIEW_KEY = 'event-hub-view';
 const VIEW_PATHS = {
   '/overview': 'overview',
@@ -36,6 +37,15 @@ function getInitialAuth() {
   return localStorage.getItem(AUTH_KEY) === 'true';
 }
 
+function getInitialUser() {
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 function getViewFromLocation() {
   const path = window.location.pathname;
   return VIEW_PATHS[path] || localStorage.getItem(VIEW_KEY) || 'overview';
@@ -43,6 +53,7 @@ function getViewFromLocation() {
 
 export default function App() {
   const [isAuthed, setIsAuthed] = useState(getInitialAuth);
+  const [user, setUser] = useState(getInitialUser);
   const [currentView, setCurrentView] = useState(getViewFromLocation);
 
   useEffect(() => {
@@ -67,15 +78,21 @@ export default function App() {
     window.history.pushState({}, '', path);
   };
 
-  const handleLogin = () => {
+  const handleLogin = (nextUser) => {
     localStorage.setItem(AUTH_KEY, 'true');
+    if (nextUser) {
+      localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+      setUser(nextUser);
+    }
     setIsAuthed(true);
     navigate('overview');
   };
 
   const handleLogout = () => {
     localStorage.removeItem(AUTH_KEY);
+    localStorage.removeItem(USER_KEY);
     setIsAuthed(false);
+    setUser(null);
     setCurrentView('overview');
     localStorage.setItem(VIEW_KEY, 'overview');
     window.history.pushState({}, '', '/');
