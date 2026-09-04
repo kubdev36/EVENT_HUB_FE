@@ -5,6 +5,7 @@ import {
   Users,
   Send,
   Sliders,
+  Building2,
   Plus,
   Edit2,
   Trash2,
@@ -23,6 +24,13 @@ import { useEventHubData } from '../API/useEventHubData';
 import { getBrandLogo } from '../constants/brandLogos';
 
 const EMPTY_TELEGRAM_CONFIG = { botToken: '', chatId: '', notifyImmediately: false, includeImage: false };
+const DEFAULT_DEPARTMENT_RULES = [
+  { type: 'promo', label: 'Khuyến mãi', departments: ['mkt', 'kinh_doanh'] },
+  { type: 'release', label: 'Ra mắt / Mở bán', departments: ['mkt'] },
+  { type: 'live', label: 'Livestream', departments: ['kinh_doanh'] },
+  { type: 'ads', label: 'Quảng cáo', departments: ['mkt'] },
+  { type: 'other', label: 'Khác', departments: ['mkt', 'kinh_doanh'] },
+];
 
 export default function Setting() {
   const [activeTab, setActiveTab] = useState('crawler');
@@ -34,6 +42,7 @@ export default function Setting() {
   const [users, setUsers] = useState([]);
   const [telegramConfig, setTelegramConfig] = useState(EMPTY_TELEGRAM_CONFIG);
   const [keywordRules, setKeywordRules] = useState([]);
+  const [departmentRules, setDepartmentRules] = useState(DEFAULT_DEPARTMENT_RULES);
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
@@ -74,6 +83,7 @@ export default function Setting() {
         const settings = settingsRes.data || {};
         if (settings.telegram_config) setTelegramConfig({ ...EMPTY_TELEGRAM_CONFIG, ...settings.telegram_config });
         if (settings.keyword_rules) setKeywordRules(settings.keyword_rules);
+        if (settings.department_rules) setDepartmentRules(settings.department_rules);
         if (settings.crawler_sources) {
           setCrawlers(
             settings.crawler_sources.map((item) => ({
@@ -266,6 +276,30 @@ export default function Setting() {
     }
   };
 
+  const handleToggleDepartment = (type, deptKey) => {
+    setDepartmentRules((prev) =>
+      prev.map((rule) => {
+        if (rule.type !== type) return rule;
+        const depts = rule.departments || [];
+        const hasDept = depts.includes(deptKey);
+        const updated = hasDept ? depts.filter((d) => d !== deptKey) : [...depts, deptKey];
+        return { ...rule, departments: updated };
+      })
+    );
+  };
+
+  const handleSaveDepartmentRules = async () => {
+    setSettingsSaving(true);
+    try {
+      await settingsApi.saveDepartments({ rules: departmentRules });
+      setStatusMessage('Đã lưu phân loại phòng ban thành công.');
+    } catch (err) {
+      setStatusMessage(err.response?.data?.message || 'Lưu phân loại phòng ban thất bại.');
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
+
   const handleSaveData = async () => {
     setSettingsSaving(true);
     try {
@@ -348,6 +382,7 @@ export default function Setting() {
             { id: 'users', label: 'Tài khoản nhân viên', icon: Users },
             { id: 'telegram', label: 'Thông báo Telegram', icon: Send },
             { id: 'keywords', label: 'Từ khóa phân loại', icon: Sliders },
+            { id: 'departments', label: 'Phân loại phòng ban', icon: Building2 },
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -369,6 +404,15 @@ export default function Setting() {
       </div>
 
       <div className="p-3 sm:p-4 lg:p-6 space-y-4">
+        {statusMessage && (
+          <div className="p-3 bg-blue-50 border border-blue-200 text-blue-800 text-xs font-medium rounded-xl flex items-center justify-between transition">
+            <span>{statusMessage}</span>
+            <button onClick={() => setStatusMessage('')} className="p-1 hover:bg-blue-100 rounded text-blue-600 cursor-pointer">
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
         {activeTab === 'crawler' && (
           <div className="space-y-3 w-full">
             <div className="flex items-center justify-between gap-2">
@@ -579,6 +623,60 @@ export default function Setting() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'departments' && (
+          <div className="w-full bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-2xs space-y-4 text-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Phân loại nhãn sự kiện cho từng Phòng ban</h2>
+                <p className="text-[11px] text-slate-500 mt-0.5">Tích chọn để chia nhãn sự kiện tương ứng cho phòng Marketing và Kinh doanh</p>
+              </div>
+              <button
+                onClick={handleSaveDepartmentRules}
+                disabled={settingsSaving}
+                className="h-8.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer shadow-2xs disabled:opacity-50 shrink-0 self-start sm:self-auto"
+              >
+                {settingsSaving ? 'Đang lưu...' : 'Lưu phân loại'}
+              </button>
+            </div>
+
+            <div className="divide-y divide-slate-100">
+              {departmentRules.map((rule) => {
+                const isMkt = (rule.departments || []).includes('mkt');
+                const isKinhDoanh = (rule.departments || []).includes('kinh_doanh');
+
+                return (
+                  <div key={rule.type} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 px-2 rounded-lg transition">
+                    <div>
+                      <span className="font-bold text-slate-800 text-xs sm:text-sm">{rule.label}</span>
+                      <span className="ml-2 font-mono text-[10px] text-slate-400">({rule.type})</span>
+                    </div>
+                    <div className="flex items-center gap-6 shrink-0">
+                      <label className="flex items-center gap-2 cursor-pointer text-slate-700 font-medium select-none">
+                        <input
+                          type="checkbox"
+                          checked={isMkt}
+                          onChange={() => handleToggleDepartment(rule.type, 'mkt')}
+                          className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                        />
+                        <span>Marketing</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer text-slate-700 font-medium select-none">
+                        <input
+                          type="checkbox"
+                          checked={isKinhDoanh}
+                          onChange={() => handleToggleDepartment(rule.type, 'kinh_doanh')}
+                          className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                        />
+                        <span>Kinh doanh</span>
+                      </label>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

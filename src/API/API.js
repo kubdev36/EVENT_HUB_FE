@@ -52,6 +52,7 @@ export const settingsApi = {
   saveTelegram: (payload) => api.post('/settings/telegram', payload),
   testTelegram: (payload) => api.post('/settings/telegram/test', payload),
   saveKeywords: (payload) => api.post('/settings/keywords', payload),
+  saveDepartments: (payload) => api.post('/settings/departments', payload),
   runCrawler: (payload) => api.post('/settings/crawler/run', payload),
   runCrawlerById: (id) => api.post(`/settings/crawler/run/${id}`),
   runAllCrawlers: () => api.post('/crawlers/run'),

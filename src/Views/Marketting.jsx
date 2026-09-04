@@ -1,19 +1,31 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Plus } from 'lucide-react';
 import Calendar from '../Components/Calendar';
 import EventCard from '../Components/EventCard';
 import EventDetail from '../Components/EventDetail';
 import AddEventModal from '../Components/AddEventModal';
 import { useEventsByDate } from '../API/useEventsByDate';
+import { settingsApi } from '../API/API';
 
 export default function Marketting() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCompetitor, setSelectedCompetitor] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [allowedTypes, setAllowedTypes] = useState(['ads', 'release', 'promo']);
 
   const dateStr = selectedDate.toLocaleDateString('en-CA');
   const { sources, refetch } = useEventsByDate(dateStr);
+
+  useEffect(() => {
+    settingsApi.getAll().then((res) => {
+      const rules = res.data?.department_rules;
+      if (Array.isArray(rules) && rules.length > 0) {
+        const mktTypes = rules.filter((r) => r.departments?.includes('mkt')).map((r) => r.type);
+        if (mktTypes.length > 0) setAllowedTypes(mktTypes);
+      }
+    }).catch(() => {});
+  }, []);
 
   const displayCompetitors = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -22,7 +34,7 @@ export default function Marketting() {
       const events = (comp.events || []).filter(
         (ev) =>
           ev.date === dateStr &&
-          ['ads', 'release', 'promo'].includes(ev.type) &&
+          allowedTypes.includes(ev.type) &&
           (q === '' || comp.name.toLowerCase().includes(q) || ev.title.toLowerCase().includes(q))
       );
 
@@ -32,7 +44,7 @@ export default function Marketting() {
         totalEvents: events.length,
       };
     }).filter((comp) => comp.totalEvents > 0);
-  }, [dateStr, searchQuery, sources]);
+  }, [dateStr, searchQuery, sources, allowedTypes]);
 
   return (
     <div className="flex h-full min-h-0 w-full overflow-hidden bg-slate-50 text-slate-800 font-sans">
@@ -67,7 +79,7 @@ export default function Marketting() {
         <Calendar
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
-          allowedTypes={['ads', 'release', 'promo']}
+          allowedTypes={allowedTypes}
         />
 
         <div className="rounded-xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
