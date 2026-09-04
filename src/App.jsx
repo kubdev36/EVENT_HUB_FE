@@ -1,17 +1,17 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, lazy, Suspense } from 'react';
 import Layout from './Layout/Layout';
 import Login from './Views/Login';
 
-import Daily from './Views/Daily';
-import Month from './Views/Month';
-import OverView from './Views/OverView';
-import Competitors from './Views/Competitors';
-import Marketting from './Views/Marketting';
-import Sale from './Views/Sale';
-import PrivateEvents from './Views/PrivateEvents';
-import MediaLibrary from './Views/MediaLibrary';
-import Reports from './Views/Reports';
-import Setting from './Views/Setting';
+const Daily = lazy(() => import('./Views/Daily'));
+const Month = lazy(() => import('./Views/Month'));
+const OverView = lazy(() => import('./Views/OverView'));
+const Competitors = lazy(() => import('./Views/Competitors'));
+const Marketting = lazy(() => import('./Views/Marketting'));
+const Sale = lazy(() => import('./Views/Sale'));
+const PrivateEvents = lazy(() => import('./Views/PrivateEvents'));
+const MediaLibrary = lazy(() => import('./Views/MediaLibrary'));
+const Reports = lazy(() => import('./Views/Reports'));
+const Setting = lazy(() => import('./Views/Setting'));
 
 const AUTH_KEY = 'event-hub-auth';
 const USER_KEY = 'user';
@@ -135,7 +135,15 @@ export default function App() {
       onNavigate={navigate}
       onLogout={handleLogout}
     >
-      {renderView}
+      <Suspense
+        fallback={
+          <div className="flex h-full w-full items-center justify-center p-8 text-slate-400 text-sm font-medium">
+            Đang tải dữ liệu...
+          </div>
+        }
+      >
+        {renderView}
+      </Suspense>
     </Layout>
   );
 }

@@ -17,11 +17,14 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getBrandLogo } from '../constants/brandLogos';
 import { useEventHubData } from '../API/useEventHubData';
 
+import { useFilterContext } from '../context/FilterContext';
+
 const COLORS = ['#2563eb', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899'];
 
 export default function Overview() {
   const [date, setDate] = useState(new Date());
   const { data: eventHubData } = useEventHubData();
+  const { isEventVisible } = useFilterContext();
 
   const { competitors, totalEvents, totalUrls, slots, brandStats, calendar, eventDays } = useMemo(() => {
     const list = eventHubData.filter((b) => b.id !== 'minhtuan');
@@ -33,6 +36,7 @@ export default function Overview() {
     list.forEach((b) => {
       urls += (b.targetUrls || []).length;
       (b.events || []).forEach((e) => {
+        if (!isEventVisible(e)) return;
         events++;
         if (e.date) daysWithEvents.add(e.date);
         if (e.time) {

@@ -2,6 +2,7 @@ import React from 'react';
 import { Clock, ChevronRight } from 'lucide-react';
 import { CATEGORY_STYLES } from '../constants/eventStyles';
 import { getBrandLogo } from '../constants/brandLogos';
+import { getOptimizedImageUrl } from '../utils/imageOptimizer';
 
 export default function EventCard({ data, onOpenDetail }) {
   const logoUrl = getBrandLogo(data?.id, data?.name, data?.logo);
@@ -78,7 +79,7 @@ export default function EventCard({ data, onOpenDetail }) {
                 <div className="h-24 sm:h-20 w-full rounded-md overflow-hidden bg-slate-50 border border-slate-100 shrink-0 select-none flex items-center justify-center">
                   {event.image ? (
                     <img
-                      src={event.image}
+                      src={getOptimizedImageUrl(event.image, 300)}
                       alt={event.title}
                       referrerPolicy="no-referrer"
                       onError={(e) => {

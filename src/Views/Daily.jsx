@@ -6,12 +6,15 @@ import EventDetail from '../Components/EventDetail';
 import AddEventModal from '../Components/AddEventModal';
 import { useEventHubData } from '../API/useEventHubData';
 
+import { useFilterContext } from '../context/FilterContext';
+
 export default function Daily() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCompetitor, setSelectedCompetitor] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const { data: eventHubData, refetch } = useEventHubData();
+  const { isEventVisible } = useFilterContext();
 
   const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
 
@@ -23,6 +26,7 @@ export default function Daily() {
         .filter(
           (ev) =>
             ev.date === dateStr &&
+            isEventVisible(ev) &&
             (q === '' || comp.name.toLowerCase().includes(q) || ev.title.toLowerCase().includes(q))
         )
         .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
@@ -33,7 +37,7 @@ export default function Daily() {
         totalEvents: events.length,
       };
     }).filter((comp) => comp.totalEvents > 0);
-  }, [dateStr, searchQuery, eventHubData]);
+  }, [dateStr, searchQuery, eventHubData, isEventVisible]);
 
   return (
     <div className="flex h-full min-h-0 w-full overflow-hidden bg-slate-50 text-slate-800 font-sans">

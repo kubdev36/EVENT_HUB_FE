@@ -17,6 +17,8 @@ import {
   ArrowRight,
   ExternalLink,
   AlertTriangle,
+  Upload,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { CATEGORY_STYLES } from '../constants/eventStyles';
 import { settingsApi, usersApi } from '../API/API';
@@ -843,6 +845,68 @@ export default function Setting() {
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="VD: CellphoneS, FPT Shop..."
                       className="w-full h-8.5 rounded-lg border border-slate-200 px-3 outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-slate-700">Logo đối thủ:</label>
+                    <div className="flex items-center gap-3">
+                      {formData.logo ? (
+                        <div className="relative group shrink-0">
+                          <img
+                            src={formData.logo}
+                            alt="Logo preview"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = '/img/mtm.jpg';
+                            }}
+                            className="w-10 h-10 rounded-lg object-contain border border-slate-200 p-1 bg-white shadow-xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, logo: '' })}
+                            className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white rounded-full p-0.5 shadow-md hover:bg-rose-600 transition cursor-pointer"
+                            title="Xóa logo"
+                          >
+                            <X size={11} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
+                          <ImageIcon size={18} />
+                        </div>
+                      )}
+
+                      <label className="flex-1 cursor-pointer">
+                        <div className="h-8.5 rounded-lg border border-blue-200 bg-blue-50/70 hover:bg-blue-100/80 text-blue-600 font-semibold px-3 flex items-center justify-center gap-2 transition text-xs select-none shadow-2xs">
+                          <Upload size={14} />
+                          <span>{formData.logo ? 'Thay đổi file logo (Browse...)' : 'Tải file logo từ máy (Browse...)'}</span>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*,.htm,.html,*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            const reader = new FileReader();
+                            reader.onload = (evt) => {
+                              if (evt.target?.result) {
+                                setFormData((prev) => ({ ...prev, logo: evt.target.result }));
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          }}
+                        />
+                      </label>
+                    </div>
+
+                    <input
+                      type="text"
+                      value={formData.logo || ''}
+                      onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                      placeholder="Hoặc dán link URL logo (.png, .jpg, .htm, .html...)"
+                      className="w-full h-8 rounded-lg border border-slate-200 px-3 outline-none focus:border-blue-500 font-mono text-[11px] mt-1"
                     />
                   </div>
 

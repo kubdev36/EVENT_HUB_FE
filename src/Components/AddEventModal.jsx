@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, Image, Link, Tag, Building2, Plus, Loader2 } from 'lucide-react';
-import { eventsApi } from '../API/API';
+import { eventsApi, settingsApi } from '../API/API';
 
-const BRAND_OPTIONS = [
+const FALLBACK_BRAND_OPTIONS = [
   { id: 'minhtuan', name: 'Minh Tuấn Mobile' },
   { id: 'cellphones', name: 'CellphoneS' },
   { id: 'hoangha', name: 'Hoàng Hà Mobile' },
@@ -20,6 +20,7 @@ const TYPE_OPTIONS = [
 ];
 
 export default function AddEventModal({ onClose, onSuccess, defaultBrandId = 'minhtuan', defaultType = 'promo' }) {
+  const [brandOptions, setBrandOptions] = useState(FALLBACK_BRAND_OPTIONS);
   const [sourceId, setSourceId] = useState(defaultBrandId);
   const [type, setType] = useState(defaultType);
   const [title, setTitle] = useState('');
@@ -37,6 +38,25 @@ export default function AddEventModal({ onClose, onSuccess, defaultBrandId = 'mi
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    settingsApi
+      .getCrawlerSources()
+      .then((res) => {
+        const sources = res?.data?.sources || res?.data;
+        if (Array.isArray(sources) && sources.length > 0) {
+          const formatted = sources.map((s) => ({ id: s.id, name: s.name }));
+          const merged = [...formatted];
+          FALLBACK_BRAND_OPTIONS.forEach((fb) => {
+            if (!merged.some((m) => m.id === fb.id)) {
+              merged.push(fb);
+            }
+          });
+          setBrandOptions(merged);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) {
@@ -47,7 +67,7 @@ export default function AddEventModal({ onClose, onSuccess, defaultBrandId = 'mi
     setIsLoading(true);
     setError('');
 
-    const selectedBrand = BRAND_OPTIONS.find((b) => b.id === sourceId);
+    const selectedBrand = brandOptions.find((b) => b.id === sourceId);
 
     try {
       await eventsApi.create({
@@ -104,7 +124,7 @@ export default function AddEventModal({ onClose, onSuccess, defaultBrandId = 'mi
                 onChange={(e) => setSourceId(e.target.value)}
                 className="w-full h-9 rounded-lg border border-slate-200 px-3 outline-none focus:border-blue-500 bg-white"
               >
-                {BRAND_OPTIONS.map((b) => (
+                {brandOptions.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
                   </option>

@@ -7,12 +7,15 @@ import AddEventModal from '../Components/AddEventModal';
 import { useEventsByDate } from '../API/useEventsByDate';
 import { settingsApi } from '../API/API';
 
+import { useFilterContext } from '../context/FilterContext';
+
 export default function Sale() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCompetitor, setSelectedCompetitor] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [allowedTypes, setAllowedTypes] = useState(['promo', 'live', 'sale']);
+  const { isEventVisible } = useFilterContext();
 
   const dateStr = selectedDate.toLocaleDateString('en-CA');
   const { sources, refetch } = useEventsByDate(dateStr);
@@ -35,6 +38,7 @@ export default function Sale() {
         .filter(
           (ev) =>
             ev.date === dateStr &&
+            isEventVisible(ev) &&
             allowedTypes.includes(ev.type) &&
             (q === '' || comp.name.toLowerCase().includes(q) || ev.title.toLowerCase().includes(q))
         )

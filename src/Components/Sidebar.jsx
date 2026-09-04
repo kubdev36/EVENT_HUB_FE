@@ -38,17 +38,11 @@ const QUICK_FILTERS = [
   { id: 'internal', label: 'Sự kiện nội bộ', color: 'bg-purple-600 border-purple-600' },
 ];
 
+import { useFilterContext } from '../context/FilterContext';
+
 export default function Sidebar({ currentView = 'overview', onNavigate, isOpen, onClose }) {
   const { data: sources } = useEventHubData();
-  const [checkedFilters, setCheckedFilters] = React.useState({
-    all: true,
-    mkt: true,
-    sale: true,
-    competitor: true,
-    internal: true,
-  });
-
-  const toggleFilter = (id) => setCheckedFilters((prev) => ({ ...prev, [id]: !prev[id] }));
+  const { checkedFilters, toggleFilter } = useFilterContext();
 
   const handleItemClick = (id) => {
     onNavigate?.(id);

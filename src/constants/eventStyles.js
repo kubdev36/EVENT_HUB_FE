@@ -1,12 +1,12 @@
 export const CATEGORY_STYLES = {
   release: {
-    label: 'Ra mat',
+    label: 'Ra mắt',
     dot: 'bg-purple-600',
     pill: 'bg-purple-50 text-purple-700 border border-purple-200',
     text: 'text-purple-700',
   },
   promo: {
-    label: 'Khuyen mai',
+    label: 'Khuyến mãi',
     dot: 'bg-orange-500',
     pill: 'bg-orange-50 text-orange-700 border border-orange-200',
     text: 'text-orange-700',
@@ -18,13 +18,13 @@ export const CATEGORY_STYLES = {
     text: 'text-blue-700',
   },
   ads: {
-    label: 'Quang cao',
+    label: 'Quảng cáo',
     dot: 'bg-emerald-500',
     pill: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
     text: 'text-emerald-700',
   },
   internal: {
-    label: 'Su kien noi bo',
+    label: 'Sự kiện nội bộ',
     dot: 'bg-violet-600',
     pill: 'bg-violet-50 text-violet-700 border border-violet-200',
     text: 'text-violet-700',

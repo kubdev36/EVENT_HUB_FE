@@ -21,6 +21,8 @@ const EVENT_TEXT_COLORS = {
   multiple: 'text-red-600 font-extrabold',
 };
 
+import { useFilterContext } from '../context/FilterContext';
+
 export default function Calendar({
   selectedDate,
   onSelectDate,
@@ -31,6 +33,7 @@ export default function Calendar({
   const [viewDate, setViewDate] = useState(selectedDate || new Date());
   const monthKey = `${viewDate.getFullYear()}-${String(viewDate.getMonth() + 1).padStart(2, '0')}`;
   const { sources } = useEventsByDate();
+  const { isEventVisible } = useFilterContext();
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -44,10 +47,11 @@ export default function Calendar({
       })
       .flatMap((comp) => comp.events || [])
       .filter((ev) => {
+        if (!isEventVisible(ev)) return false;
         if (!allowedTypes || allowedTypes.length === 0) return true;
         return allowedTypes.includes(ev.type) && String(ev.date || '').startsWith(monthKey);
       });
-  }, [allowedTypes, competitorId, excludeCompetitorId, sources, monthKey]);
+  }, [allowedTypes, competitorId, excludeCompetitorId, sources, monthKey, isEventVisible]);
 
   const eventsByDate = useMemo(() => {
     const map = {};

@@ -10,6 +10,10 @@ export const BRAND_LOGOS = {
 };
 
 export function getBrandLogo(brandId, brandName, currentLogo) {
+  if (currentLogo && typeof currentLogo === 'string' && currentLogo.trim().length > 0) {
+    return currentLogo;
+  }
+
   const id = String(brandId || '').toLowerCase().trim();
   const name = String(brandName || '').toLowerCase().trim();
 
@@ -35,10 +39,6 @@ export function getBrandLogo(brandId, brandName, currentLogo) {
   }
   if (id.includes('nguyenkim') || name.includes('nguyễn kim') || name.includes('nguyen kim')) {
     return BRAND_LOGOS.nguyenkim;
-  }
-
-  if (currentLogo && (currentLogo.startsWith('/img/') || currentLogo.startsWith('data:'))) {
-    return currentLogo;
   }
 
   return '/img/mtm.jpg';
